@@ -4,7 +4,7 @@ This project is designed to run locally on Windows with a small Python, DuckDB, 
 
 ## Python Version
 
-Use Python 3.11 or newer.
+Use Python 3.11 or 3.12. The dbt dependency stack used by this project is not currently validated on Python 3.13+.
 
 Check your version:
 
@@ -189,6 +189,34 @@ dbt debug --profiles-dir .
 
 The Makefile target `dbt-debug` follows this repository-local profile convention.
 
+You can also initialize the local profile with:
+
+```powershell
+make dbt-init-profile
+```
+
+## Run dbt Models
+
+After raw ingestion and stage normalization have produced at least one staged Parquet file, run:
+
+```powershell
+make dbt-run
+make dbt-test
+```
+
+Or run both models and tests together:
+
+```powershell
+make dbt-build
+```
+
+The first dbt models are:
+
+- `stg_steam__app_catalog`: reads staged Steam app catalog Parquet.
+- `int_steam__app_catalog_latest`: selects the latest available record per Steam app ID.
+
+These models read from `data/stage/steam/app_catalog/**/*.parquet` and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
+
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, future DuckDB/dbt development, raw Steam app catalog landing, and Steam app catalog stage normalization. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, and initial dbt models over staged Parquet. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.

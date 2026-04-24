@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_steam__app_catalog
+    description: "Source-shaped staging model for Steam app catalog records from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["steam"]
+      - name: source_app_id
+        description: "Steam application identifier."
+        tests:
+          - not_null
+      - name: app_name
+        description: "Application name as provided by Steam."
+        tests:
+          - not_null
+      - name: item_type
+        description: "Steam item type when available from the source payload."
+      - name: last_modified
+        description: "Source last-modified timestamp when available."
+      - name: price_change_number
+        description: "Steam price change marker when available."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["success"]
+      - name: is_valid_app_record
+        description: "True when the staged app record has the minimum fields needed for analysis."
+        tests:
+          - not_null

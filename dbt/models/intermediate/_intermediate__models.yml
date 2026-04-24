@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_steam__app_catalog_latest
+    description: "Latest available Steam app catalog record per source app ID."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["steam"]
+      - name: source_app_id
+        description: "Steam application identifier."
+        tests:
+          - not_null
+          - unique
+      - name: app_name
+        description: "Latest available Steam application name."
+        tests:
+          - not_null
+      - name: item_type
+        description: "Latest available Steam item type."
+      - name: last_modified
+        description: "Latest available source last-modified timestamp."
+      - name: price_change_number
+        description: "Latest available Steam price change marker."
+      - name: extract_date
+        description: "Extract date for the selected latest record."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Run timestamp for the selected latest record."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Raw JSON payload path for the selected latest record."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Raw ingestion status for the selected latest record."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["success"]

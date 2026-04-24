@@ -1,4 +1,4 @@
-.PHONY: setup init-local validate show-paths ingest-steam-app-catalog stage-steam-app-catalog test lint dbt-debug
+.PHONY: setup init-local validate show-paths ingest-steam-app-catalog stage-steam-app-catalog test lint dbt-init-profile dbt-debug dbt-run dbt-test dbt-build
 
 setup:
 	python -m pip install -e ".[dev]"
@@ -24,5 +24,17 @@ test:
 lint:
 	python -m ruff check src tests
 
+dbt-init-profile:
+	powershell -NoProfile -Command "if (-not (Test-Path 'dbt/profiles.yml')) { Copy-Item 'dbt/profiles.example.yml' 'dbt/profiles.yml' }"
+
 dbt-debug:
 	cd dbt && dbt debug --profiles-dir .
+
+dbt-run:
+	cd dbt && dbt run --profiles-dir .
+
+dbt-test:
+	cd dbt && dbt test --profiles-dir .
+
+dbt-build:
+	cd dbt && dbt build --profiles-dir .

@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: steam_stage
+    description: "Locally staged Steam datasets written by the Python normalization flows."
+    tables:
+      - name: app_catalog
+        description: "Steam app catalog staged Parquet files produced from raw app catalog extracts."
+        config:
+          external_location: "read_parquet('../data/stage/steam/app_catalog/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: source_system
+            description: "Source system identifier."
+          - name: source_app_id
+            description: "Steam application identifier."
+          - name: app_name
+            description: "Application name as provided by Steam."
+          - name: item_type
+            description: "Steam item type when available from the source payload."
+          - name: last_modified
+            description: "Source last-modified timestamp when available."
+          - name: price_change_number
+            description: "Steam price change marker when available."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
