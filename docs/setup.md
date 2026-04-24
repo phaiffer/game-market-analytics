@@ -126,6 +126,34 @@ metadata.json
 
 This command does not fetch Steam reviews, create dbt models, write to DuckDB, or normalize the payload.
 
+## Run Controlled Steam Reviews Ingestion
+
+Steam reviews are ingested only for explicit app IDs. This avoids accidental full-catalog crawling.
+
+Repeated app IDs:
+
+```powershell
+game-market-analytics ingest-steam-reviews --app-id 570 --app-id 730 --max-pages 1
+```
+
+Input file:
+
+```powershell
+game-market-analytics ingest-steam-reviews --input-file .local\review_app_ids.txt
+```
+
+The input file should contain one positive integer app ID per line. Blank lines and lines starting with `#` are ignored.
+
+Review raw files land under:
+
+```text
+data/raw/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+Each app-specific run writes page-level JSON payloads and a `metadata.json` file. If one app fails, the command records failure metadata for that app and continues with the next app ID.
+
+This command does not normalize reviews, write review Parquet, or create dbt review models yet.
+
 ## Stage the Steam App Catalog
 
 After a successful raw ingestion run, normalize the latest successful raw extract:

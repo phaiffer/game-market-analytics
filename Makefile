@@ -1,4 +1,4 @@
-.PHONY: setup init-local validate show-paths ingest-steam-app-catalog stage-steam-app-catalog test lint dbt-init-profile dbt-debug dbt-run dbt-test dbt-build
+.PHONY: setup init-local validate show-paths ingest-steam-app-catalog ingest-steam-reviews stage-steam-app-catalog test lint dbt-init-profile dbt-debug dbt-run dbt-test dbt-build
 
 setup:
 	python -m pip install -e ".[dev]"
@@ -14,6 +14,9 @@ show-paths:
 
 ingest-steam-app-catalog:
 	python -m game_market_analytics.cli ingest-steam-app-catalog
+
+ingest-steam-reviews:
+	python -m game_market_analytics.cli ingest-steam-reviews
 
 stage-steam-app-catalog:
 	python -m game_market_analytics.cli stage-steam-app-catalog

@@ -8,6 +8,15 @@ from pathlib import Path
 from game_market_analytics.config import LocalSettings, load_local_settings
 from game_market_analytics.ingestion.steam.app_catalog import ingest_steam_app_catalog
 from game_market_analytics.ingestion.steam.client import SteamClientError
+from game_market_analytics.ingestion.steam.reviews import (
+    DEFAULT_FILTER,
+    DEFAULT_LANGUAGE,
+    DEFAULT_MAX_PAGES,
+    DEFAULT_REVIEW_TYPE,
+    SteamReviewsInputError,
+    ingest_reviews_batch,
+    parse_app_ids,
+)
 from game_market_analytics.ingestion.steam.stage_app_catalog import (
     SteamAppCatalogStageError,
     stage_steam_app_catalog,
@@ -96,6 +105,57 @@ def _stage_steam_app_catalog(settings: LocalSettings, raw_file: str | None = Non
     return 0
 
 
+def _ingest_steam_reviews(
+    settings: LocalSettings,
+    *,
+    app_id_values: list[str] | None,
+    input_file: str | None,
+    max_pages: int,
+    language: str,
+    review_type: str,
+    filter_value: str,
+) -> int:
+    for directory in settings.paths.writable_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        app_ids = parse_app_ids(
+            app_id_values=app_id_values,
+            input_file=Path(input_file) if input_file else None,
+        )
+        if max_pages <= 0:
+            raise SteamReviewsInputError("--max-pages must be a positive integer.")
+    except SteamReviewsInputError as exc:
+        print(f"Steam reviews ingestion input error: {exc}")
+        return 2
+
+    results = ingest_reviews_batch(
+        paths=settings.paths,
+        app_ids=app_ids,
+        max_pages=max_pages,
+        language=language,
+        review_type=review_type,
+        filter_value=filter_value,
+    )
+
+    print("Steam reviews ingestion completed.")
+    for result in results:
+        print(
+            " ".join(
+                [
+                    f"app_id={result.app_id}",
+                    f"status={result.status}",
+                    f"pages_fetched={result.pages_fetched}",
+                    f"review_count={result.review_count}",
+                    f"stop_reason={result.pagination_stop_reason}",
+                    f"metadata_file_path={_format_path(result.metadata_file_path)}",
+                ]
+            )
+        )
+
+    return 1 if any(result.status != "success" for result in results) else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="game-market-analytics",
@@ -127,6 +187,43 @@ def build_parser() -> argparse.ArgumentParser:
         "--raw-file",
         help="Optional path to a specific raw app_catalog.json file.",
     )
+    reviews_parser = subparsers.add_parser(
+        "ingest-steam-reviews",
+        help="Fetch and land raw Steam reviews for a controlled set of app IDs.",
+    )
+    reviews_parser.add_argument(
+        "--app-id",
+        action="append",
+        dest="app_ids",
+        help="Steam app ID to ingest. Can be repeated.",
+    )
+    reviews_parser.add_argument(
+        "--input-file",
+        help="Text file with one Steam app ID per line.",
+    )
+    reviews_parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=DEFAULT_MAX_PAGES,
+        help=f"Maximum review pages to fetch per app ID. Default: {DEFAULT_MAX_PAGES}.",
+    )
+    reviews_parser.add_argument(
+        "--language",
+        default=DEFAULT_LANGUAGE,
+        help=f"Steam review language code or 'all'. Default: {DEFAULT_LANGUAGE}.",
+    )
+    reviews_parser.add_argument(
+        "--review-type",
+        default=DEFAULT_REVIEW_TYPE,
+        choices=["all", "positive", "negative"],
+        help=f"Review type filter. Default: {DEFAULT_REVIEW_TYPE}.",
+    )
+    reviews_parser.add_argument(
+        "--filter",
+        default=DEFAULT_FILTER,
+        choices=["recent", "updated", "all"],
+        help=f"Steam review sort/filter mode. Default: {DEFAULT_FILTER}.",
+    )
 
     return parser
 
@@ -147,6 +244,16 @@ def main(argv: list[str] | None = None) -> int:
         return _ingest_steam_app_catalog(settings)
     if args.command == "stage-steam-app-catalog":
         return _stage_steam_app_catalog(settings, raw_file=args.raw_file)
+    if args.command == "ingest-steam-reviews":
+        return _ingest_steam_reviews(
+            settings,
+            app_id_values=args.app_ids,
+            input_file=args.input_file,
+            max_pages=args.max_pages,
+            language=args.language,
+            review_type=args.review_type,
+            filter_value=args.filter,
+        )
 
     parser.error(f"Unknown command: {args.command}")
     return 2
