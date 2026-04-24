@@ -126,6 +126,41 @@ metadata.json
 
 This command does not fetch Steam reviews, create dbt models, write to DuckDB, or normalize the payload.
 
+## Stage the Steam App Catalog
+
+After a successful raw ingestion run, normalize the latest successful raw extract:
+
+```powershell
+game-market-analytics stage-steam-app-catalog
+```
+
+Or:
+
+```powershell
+make stage-steam-app-catalog
+```
+
+By default, the command finds the latest successful raw app catalog extract. To stage a specific raw file:
+
+```powershell
+game-market-analytics stage-steam-app-catalog --raw-file data\raw\steam\app_catalog\extract_date=YYYY-MM-DD\run_timestamp=YYYYMMDDTHHMMSSZ\app_catalog.json
+```
+
+Staged output lands under:
+
+```text
+data/stage/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+The directory contains:
+
+```text
+app_catalog.parquet
+metadata.json
+```
+
+This command writes local Parquet only. It does not write to DuckDB tables or create dbt models.
+
 ## dbt Profile Template
 
 The repository includes a dbt profile example at:
@@ -156,4 +191,4 @@ The Makefile target `dbt-debug` follows this repository-local profile convention
 
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, future DuckDB/dbt development, and raw Steam app catalog landing. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, future DuckDB/dbt development, raw Steam app catalog landing, and Steam app catalog stage normalization. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.

@@ -8,6 +8,10 @@ from pathlib import Path
 from game_market_analytics.config import LocalSettings, load_local_settings
 from game_market_analytics.ingestion.steam.app_catalog import ingest_steam_app_catalog
 from game_market_analytics.ingestion.steam.client import SteamClientError
+from game_market_analytics.ingestion.steam.stage_app_catalog import (
+    SteamAppCatalogStageError,
+    stage_steam_app_catalog,
+)
 
 
 def _format_path(path: Path) -> str:
@@ -71,6 +75,27 @@ def _ingest_steam_app_catalog(settings: LocalSettings) -> int:
     return 0
 
 
+def _stage_steam_app_catalog(settings: LocalSettings, raw_file: str | None = None) -> int:
+    for directory in settings.paths.writable_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        result = stage_steam_app_catalog(
+            paths=settings.paths,
+            raw_file_path=Path(raw_file) if raw_file else None,
+        )
+    except SteamAppCatalogStageError as exc:
+        print(f"Steam app catalog staging failed: {exc}")
+        return 1
+
+    print("Steam app catalog staging completed.")
+    print(f"raw_input_path={_format_path(result.raw_input_path)}")
+    print(f"staged_output_path={_format_path(result.staged_output_path)}")
+    print(f"metadata_file_path={_format_path(result.metadata_file_path)}")
+    print(f"row_count={result.row_count}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="game-market-analytics",
@@ -94,6 +119,14 @@ def build_parser() -> argparse.ArgumentParser:
         "ingest-steam-app-catalog",
         help="Fetch and land the raw Steam app catalog payload.",
     )
+    stage_parser = subparsers.add_parser(
+        "stage-steam-app-catalog",
+        help="Normalize a raw Steam app catalog extract into staged Parquet.",
+    )
+    stage_parser.add_argument(
+        "--raw-file",
+        help="Optional path to a specific raw app_catalog.json file.",
+    )
 
     return parser
 
@@ -112,6 +145,8 @@ def main(argv: list[str] | None = None) -> int:
         return _init_local(settings)
     if args.command == "ingest-steam-app-catalog":
         return _ingest_steam_app_catalog(settings)
+    if args.command == "stage-steam-app-catalog":
+        return _stage_steam_app_catalog(settings, raw_file=args.raw_file)
 
     parser.error(f"Unknown command: {args.command}")
     return 2

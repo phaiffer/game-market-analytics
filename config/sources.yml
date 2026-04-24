@@ -3,7 +3,7 @@ sources:
     status: partially_implemented
     priority: high
     purpose: "Primary MVP source for store catalog, release, platform, and future review aggregate signals."
-    notes: "Steam app catalog raw landing is implemented. Reviews and additional endpoints are deferred."
+    notes: "Steam app catalog raw landing and stage normalization are implemented. Reviews and additional endpoints are deferred."
 
   - source_name: igdb
     status: planned

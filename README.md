@@ -4,7 +4,7 @@ A standalone portfolio repository for local-first game market analytics and gami
 
 This project is intended to become a technically serious analytics engineering and data engineering case study around real-world game catalog data. The long-term goal is to analyze how games, publishers, developers, platforms, genres, themes, releases, reviews, and eventually prices shape market positioning.
 
-The repository is currently in an early implementation phase. It defines the documentation, project layout, configuration placeholders, Python package boundaries, and dbt scaffold needed for future implementation. It also includes the first real raw ingestion flow: Steam app catalog landing. It does not yet ingest reviews, build production models, or publish dashboards.
+The repository is currently in an early implementation phase. It defines the documentation, project layout, configuration placeholders, Python package boundaries, and dbt scaffold needed for future implementation. It includes the first real source flow: Steam app catalog raw landing and stage normalization. It does not yet ingest reviews, build production models, or publish dashboards.
 
 ## Domain Focus
 
@@ -38,7 +38,7 @@ The project is designed to support these future sources:
 - **IGDB**: richer metadata for games, companies, genres, themes, platforms, and release context.
 - **IsThereAnyDeal**: future pricing, discount, and deal history enrichment.
 
-Current implementation note: the Steam app catalog endpoint is implemented as a raw landing flow only. Steam reviews, IGDB, and IsThereAnyDeal are still planned work.
+Current implementation note: the Steam app catalog endpoint is implemented through raw landing and stage normalization. Steam reviews, IGDB, and IsThereAnyDeal are still planned work.
 
 ## Architecture Direction
 
@@ -78,6 +78,7 @@ Implemented in the current foundation and local baseline:
 - Safe local workflow targets and development utilities in `Makefile`.
 - Example environment variable placeholders in `.env.example`.
 - Real Steam app catalog raw ingestion under `src/game_market_analytics/ingestion/steam/`.
+- Steam app catalog stage normalization to Parquet under `data/stage/`.
 
 ## Implemented Ingestion
 
@@ -111,6 +112,30 @@ This flow preserves the source payload as-is for future normalization and stagin
 
 The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command.
 
+After raw ingestion, normalize the latest successful raw extract into staged Parquet:
+
+```powershell
+game-market-analytics stage-steam-app-catalog
+```
+
+Or through the Makefile:
+
+```powershell
+make stage-steam-app-catalog
+```
+
+The staged dataset lands under:
+
+```text
+data/stage/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/app_catalog.parquet
+```
+
+Each staged run also writes:
+
+```text
+data/stage/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/metadata.json
+```
+
 ## Local Setup
 
 The local development baseline now includes a small CLI for setup and validation. See `docs/setup.md` for the full walkthrough.
@@ -139,7 +164,7 @@ Future phases may add:
 
 - Additional Steam endpoints such as review aggregates.
 - Source-specific ingestion clients for IGDB.
-- Raw-to-stage normalization into DuckDB.
+- Loading staged data into DuckDB.
 - Entity matching and conformed game/company dimensions.
 - dbt staging, intermediate, and mart models.
 - Data quality checks and data contract tests.
@@ -170,6 +195,7 @@ make init-local
 make validate
 make show-paths
 make ingest-steam-app-catalog
+make stage-steam-app-catalog
 make test
 make lint
 make dbt-debug

@@ -37,6 +37,12 @@ metadata.json
 
 The partition-style path supports multiple runs, is easy to inspect locally, and prepares the project for future raw-to-stage processing.
 
+The raw payload can be normalized with:
+
+```powershell
+game-market-analytics stage-steam-app-catalog
+```
+
 ## Metadata
 
 The sidecar `metadata.json` includes:
