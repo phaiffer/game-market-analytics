@@ -66,7 +66,7 @@ From an analytics engineering perspective, the domain supports clear dimensional
 
 ## Current Repository Foundation
 
-Implemented in this initialization step:
+Implemented in the current foundation:
 
 - Documentation foundation under `docs/`.
 - Source, entity, and metric configuration placeholders under `config/`.
@@ -75,8 +75,30 @@ Implemented in this initialization step:
 - dbt project scaffold under `dbt/` aimed at DuckDB.
 - Test directory placeholders for unit tests and data contracts.
 - Minimal project metadata in `pyproject.toml`.
-- Safe local workflow targets in `Makefile`.
+- Safe local workflow targets and development utilities in `Makefile`.
 - Example environment variable placeholders in `.env.example`.
+
+## Local Setup
+
+The local development baseline now includes a small CLI for setup and validation. See `docs/setup.md` for the full walkthrough.
+
+Typical Windows setup:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+game-market-analytics init-local
+game-market-analytics validate-project
+```
+
+The repository-local DuckDB convention is:
+
+```text
+.local/game_market_analytics.duckdb
+```
+
+This file is ignored by Git and is intended for future local dbt and DuckDB development.
 
 ## Planned Future Implementation
 
@@ -106,13 +128,16 @@ tests/                      Unit and data contract test placeholders
 
 ## Local Workflow
 
-The Makefile contains small placeholder commands for the future workflow:
+The Makefile contains small local workflow commands:
 
 ```powershell
 make setup
+make init-local
+make validate
+make show-paths
 make test
 make lint
 make dbt-debug
 ```
 
-Some commands are intentionally minimal until implementation begins.
+The `dbt-debug` target expects a local `dbt/profiles.yml`, which can be created from `dbt/profiles.example.yml`.

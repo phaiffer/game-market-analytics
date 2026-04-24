@@ -22,6 +22,7 @@ env/
 !.env.example
 
 # DuckDB and local data outputs
+.local/
 *.duckdb
 *.duckdb.wal
 *.db

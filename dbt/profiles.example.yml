@@ -1,0 +1,7 @@
+game_market_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../.local/game_market_analytics.duckdb"
+      threads: 4
