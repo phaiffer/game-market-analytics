@@ -1,0 +1,1 @@
+"""IGDB ingestion package placeholder."""

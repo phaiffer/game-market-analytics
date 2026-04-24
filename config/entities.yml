@@ -1,0 +1,31 @@
+entities:
+  game:
+    description: "A game or game-like product observed from one or more source systems."
+    initial_grain: "One row per source-specific game record."
+    future_grain: "One row per conformed game entity after matching."
+
+  company:
+    description: "A publisher, developer, or other company associated with a game."
+    initial_grain: "One row per source-specific company record."
+    future_grain: "One row per conformed company entity after matching."
+
+  platform:
+    description: "A platform on which a game is released or supported."
+    initial_grain: "One row per source-specific platform record."
+
+  genre:
+    description: "A source-defined gameplay or market category."
+    initial_grain: "One row per source-specific genre record."
+
+  theme:
+    description: "A source-defined theme, setting, or subject classification."
+    initial_grain: "One row per source-specific theme record."
+
+  review_snapshot:
+    description: "A point-in-time observation of review aggregate signals."
+    initial_grain: "One row per source game per snapshot date."
+
+  price_snapshot:
+    description: "A future point-in-time observation of price and discount signals."
+    initial_grain: "One row per source game, store, and snapshot date."
+    status: "future"

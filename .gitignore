@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# DuckDB and local data outputs
+*.duckdb
+*.duckdb.wal
+*.db
+*.sqlite
+data/raw/**
+data/stage/**
+data/marts/**
+!data/raw/
+!data/raw/.gitkeep
+!data/raw/steam/
+!data/raw/steam/.gitkeep
+!data/raw/igdb/
+!data/raw/igdb/.gitkeep
+!data/raw/itad/
+!data/raw/itad/.gitkeep
+!data/stage/
+!data/stage/.gitkeep
+!data/marts/
+!data/marts/.gitkeep
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/profiles.yml
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Windows and editor files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.vscode/
+.idea/

@@ -1,0 +1,18 @@
+sources:
+  - source_name: steam
+    status: planned
+    priority: high
+    purpose: "Primary MVP source for store catalog, release, platform, and review aggregate signals."
+    notes: "No integration implemented yet. API and data access patterns will be validated during MVP work."
+
+  - source_name: igdb
+    status: planned
+    priority: high
+    purpose: "Metadata enrichment source for games, companies, genres, themes, platforms, and release context."
+    notes: "No integration implemented yet. Authentication and field availability will be validated before use."
+
+  - source_name: itad
+    status: later
+    priority: medium
+    purpose: "Future source for pricing, discount, and deal history enrichment."
+    notes: "Deferred until catalog identity and matching logic are mature."

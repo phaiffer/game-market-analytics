@@ -1,0 +1,1 @@
+"""IsThereAnyDeal ingestion package placeholder."""

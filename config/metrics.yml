@@ -1,0 +1,30 @@
+metrics:
+  total_cataloged_games:
+    description: "Count of distinct games or source-specific game records, depending on model maturity."
+    domain: catalog
+    status: planned
+
+  games_with_core_metadata:
+    description: "Count of games with required title, source ID, and release metadata populated."
+    domain: catalog
+    status: planned
+
+  release_count:
+    description: "Count of release events at the modeled release grain."
+    domain: releases
+    status: planned
+
+  positive_review_ratio:
+    description: "Share of positive reviews among total reviews for a game or segment."
+    domain: reputation
+    status: planned
+
+  publisher_portfolio_size:
+    description: "Count of games associated with a publisher role."
+    domain: publisher_portfolio
+    status: planned
+
+  average_discount_percent:
+    description: "Average observed discount percentage for games with pricing data."
+    domain: pricing
+    status: future
