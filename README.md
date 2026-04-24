@@ -4,7 +4,7 @@ A standalone portfolio repository for local-first game market analytics and gami
 
 This project is intended to become a technically serious analytics engineering and data engineering case study around real-world game catalog data. The long-term goal is to analyze how games, publishers, developers, platforms, genres, themes, releases, reviews, and eventually prices shape market positioning.
 
-The repository is currently in its foundation phase. It defines the documentation, project layout, configuration placeholders, Python package boundaries, and dbt scaffold needed for future implementation. It does not yet ingest external APIs, build production models, or publish dashboards.
+The repository is currently in an early implementation phase. It defines the documentation, project layout, configuration placeholders, Python package boundaries, and dbt scaffold needed for future implementation. It also includes the first real raw ingestion flow: Steam app catalog landing. It does not yet ingest reviews, build production models, or publish dashboards.
 
 ## Domain Focus
 
@@ -38,7 +38,7 @@ The project is designed to support these future sources:
 - **IGDB**: richer metadata for games, companies, genres, themes, platforms, and release context.
 - **IsThereAnyDeal**: future pricing, discount, and deal history enrichment.
 
-No real API integration is implemented yet.
+Current implementation note: the Steam app catalog endpoint is implemented as a raw landing flow only. Steam reviews, IGDB, and IsThereAnyDeal are still planned work.
 
 ## Architecture Direction
 
@@ -66,17 +66,50 @@ From an analytics engineering perspective, the domain supports clear dimensional
 
 ## Current Repository Foundation
 
-Implemented in the current foundation:
+Implemented in the current foundation and local baseline:
 
 - Documentation foundation under `docs/`.
 - Source, entity, and metric configuration placeholders under `config/`.
 - Local data directory layout under `data/`.
 - Python package scaffold under `src/game_market_analytics/`.
 - dbt project scaffold under `dbt/` aimed at DuckDB.
-- Test directory placeholders for unit tests and data contracts.
+- Test directory placeholders and focused unit tests for local utilities and raw ingestion helpers.
 - Minimal project metadata in `pyproject.toml`.
 - Safe local workflow targets and development utilities in `Makefile`.
 - Example environment variable placeholders in `.env.example`.
+- Real Steam app catalog raw ingestion under `src/game_market_analytics/ingestion/steam/`.
+
+## Implemented Ingestion
+
+The first implemented source flow is the Steam application catalog.
+
+Run it locally after setup:
+
+```powershell
+game-market-analytics ingest-steam-app-catalog
+```
+
+Or through the Makefile:
+
+```powershell
+make ingest-steam-app-catalog
+```
+
+The command fetches the official Steam app list payload and lands the raw JSON response under:
+
+```text
+data/raw/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/app_catalog.json
+```
+
+Each successful run also writes a sidecar metadata file:
+
+```text
+data/raw/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/metadata.json
+```
+
+This flow preserves the source payload as-is for future normalization and staging work.
+
+The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command.
 
 ## Local Setup
 
@@ -104,7 +137,8 @@ This file is ignored by Git and is intended for future local dbt and DuckDB deve
 
 Future phases may add:
 
-- Source-specific ingestion clients for Steam and IGDB.
+- Additional Steam endpoints such as review aggregates.
+- Source-specific ingestion clients for IGDB.
 - Raw-to-stage normalization into DuckDB.
 - Entity matching and conformed game/company dimensions.
 - dbt staging, intermediate, and mart models.
@@ -135,6 +169,7 @@ make setup
 make init-local
 make validate
 make show-paths
+make ingest-steam-app-catalog
 make test
 make lint
 make dbt-debug

@@ -15,6 +15,7 @@ class LocalSettings:
 
     paths: ProjectPaths
     duckdb_path: Path
+    steam_api_key: str | None = None
 
 
 def _resolve_repo_path(value: str, project_root: Path) -> Path:
@@ -24,15 +25,42 @@ def _resolve_repo_path(value: str, project_root: Path) -> Path:
     return candidate.resolve()
 
 
+def _load_env_file(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+
+    values: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+
+        key, value = stripped.split("=", 1)
+        values[key.strip()] = value.strip().strip('"').strip("'")
+
+    return values
+
+
+def _get_setting(name: str, env_file_values: dict[str, str]) -> str | None:
+    return os.getenv(name) or env_file_values.get(name) or None
+
+
 def load_local_settings(paths: ProjectPaths | None = None) -> LocalSettings:
     """Load local settings without requiring a .env parser."""
 
     resolved_paths = paths or get_project_paths()
-    duckdb_env_value = os.getenv("DUCKDB_PATH")
+    env_file_values = _load_env_file(resolved_paths.project_root / ".env")
+
+    duckdb_env_value = _get_setting("DUCKDB_PATH", env_file_values)
     duckdb_path = (
         _resolve_repo_path(duckdb_env_value, resolved_paths.project_root)
         if duckdb_env_value
         else resolved_paths.duckdb_path
     )
+    steam_api_key = _get_setting("STEAM_API_KEY", env_file_values)
 
-    return LocalSettings(paths=resolved_paths, duckdb_path=duckdb_path)
+    return LocalSettings(
+        paths=resolved_paths,
+        duckdb_path=duckdb_path,
+        steam_api_key=steam_api_key,
+    )

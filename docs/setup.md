@@ -89,6 +89,43 @@ make show-paths
 make test
 ```
 
+## Run the Steam App Catalog Ingestion
+
+The first real ingestion utility lands the raw Steam app catalog payload locally:
+
+```powershell
+game-market-analytics ingest-steam-app-catalog
+```
+
+Or:
+
+```powershell
+make ingest-steam-app-catalog
+```
+
+The current official Steam Store app list endpoint requires a Steam Web API key. Add it to your active shell or local `.env` file:
+
+```powershell
+$env:STEAM_API_KEY = "your-key-here"
+```
+
+The command fetches the app catalog endpoint, writes the raw JSON response, and writes run metadata next to the payload.
+
+Successful runs land under:
+
+```text
+data/raw/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+The directory contains:
+
+```text
+app_catalog.json
+metadata.json
+```
+
+This command does not fetch Steam reviews, create dbt models, write to DuckDB, or normalize the payload.
+
 ## dbt Profile Template
 
 The repository includes a dbt profile example at:
@@ -119,4 +156,4 @@ The Makefile target `dbt-debug` follows this repository-local profile convention
 
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, and future DuckDB/dbt development. It does not ingest Steam, IGDB, or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, future DuckDB/dbt development, and raw Steam app catalog landing. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.
