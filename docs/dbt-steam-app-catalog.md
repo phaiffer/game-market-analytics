@@ -24,12 +24,14 @@ The profile points to:
 .local/game_market_analytics.duckdb
 ```
 
+Run dbt from the repository root with `--project-dir dbt --profiles-dir dbt`. The Makefile dbt targets use this convention.
+
 ## Source
 
 The dbt source `steam_stage.app_catalog` reads staged Parquet files from:
 
 ```text
-../data/stage/steam/app_catalog/**/*.parquet
+data/stage/steam/app_catalog/**/*.parquet
 ```
 
 This keeps dbt downstream of the Python raw-to-stage flow. dbt does not read raw JSON.

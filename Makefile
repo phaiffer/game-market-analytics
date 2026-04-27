@@ -31,13 +31,13 @@ dbt-init-profile:
 	powershell -NoProfile -Command "if (-not (Test-Path 'dbt/profiles.yml')) { Copy-Item 'dbt/profiles.example.yml' 'dbt/profiles.yml' }"
 
 dbt-debug:
-	cd dbt && dbt debug --profiles-dir .
+	dbt debug --project-dir dbt --profiles-dir dbt
 
 dbt-run:
-	cd dbt && dbt run --profiles-dir .
+	dbt run --project-dir dbt --profiles-dir dbt
 
 dbt-test:
-	cd dbt && dbt test --profiles-dir .
+	dbt test --project-dir dbt --profiles-dir dbt
 
 dbt-build:
-	cd dbt && dbt build --profiles-dir .
+	dbt build --project-dir dbt --profiles-dir dbt

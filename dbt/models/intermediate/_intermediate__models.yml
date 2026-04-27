@@ -9,7 +9,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["steam"]
+              arguments:
+                values: ["steam"]
       - name: source_app_id
         description: "Steam application identifier."
         tests:
@@ -42,4 +43,5 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["success"]
+              arguments:
+                values: ["success"]

@@ -3,5 +3,5 @@ game_market_analytics:
   outputs:
     dev:
       type: duckdb
-      path: "../.local/game_market_analytics.duckdb"
+      path: ".local/game_market_analytics.duckdb"
       threads: 4

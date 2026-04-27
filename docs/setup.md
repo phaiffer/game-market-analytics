@@ -45,7 +45,7 @@ Copy `.env.example` to `.env` for local use:
 Copy-Item .env.example .env
 ```
 
-The API credential values are placeholders for future source integrations. They are not used by the current local utilities.
+`STEAM_API_KEY` is used by the Steam app catalog ingestion flow. The IGDB and IsThereAnyDeal credential values remain placeholders for future source integrations.
 
 The default local DuckDB convention is:
 
@@ -108,6 +108,14 @@ The current official Steam Store app list endpoint requires a Steam Web API key.
 ```powershell
 $env:STEAM_API_KEY = "your-key-here"
 ```
+
+The default authentication format sends the key as Steam's `key` query parameter. If you need to test header-based authentication, set:
+
+```powershell
+$env:STEAM_API_KEY_AUTH_LOCATION = "header"
+```
+
+Valid values are `query` and `header`. The header mode sends the key as `x-webapi-key`.
 
 The command fetches the app catalog endpoint, writes the raw JSON response, and writes run metadata next to the payload.
 
@@ -209,10 +217,10 @@ The example points dbt to:
 .local/game_market_analytics.duckdb
 ```
 
-When running dbt from the `dbt/` directory, use:
+Run dbt from the repository root:
 
 ```powershell
-dbt debug --profiles-dir .
+dbt debug --project-dir dbt --profiles-dir dbt
 ```
 
 The Makefile target `dbt-debug` follows this repository-local profile convention.
@@ -243,7 +251,7 @@ The first dbt models are:
 - `stg_steam__app_catalog`: reads staged Steam app catalog Parquet.
 - `int_steam__app_catalog_latest`: selects the latest available record per Steam app ID.
 
-These models read from `data/stage/steam/app_catalog/**/*.parquet` and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
+These models read from `data/stage/steam/app_catalog/**/*.parquet` relative to the repository root and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
 
 ## Current Scope
 

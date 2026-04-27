@@ -72,6 +72,7 @@ def _ingest_steam_app_catalog(settings: LocalSettings) -> int:
         result = ingest_steam_app_catalog(
             paths=settings.paths,
             steam_api_key=settings.steam_api_key,
+            steam_api_key_auth_location=settings.steam_api_key_auth_location,
         )
     except SteamClientError as exc:
         print(f"Steam app catalog ingestion failed: {exc}")

@@ -9,7 +9,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["steam"]
+              arguments:
+                values: ["steam"]
       - name: source_app_id
         description: "Steam application identifier."
         tests:
@@ -41,7 +42,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ["success"]
+              arguments:
+                values: ["success"]
       - name: is_valid_app_record
         description: "True when the staged app record has the minimum fields needed for analysis."
         tests:

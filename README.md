@@ -112,7 +112,7 @@ data/raw/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSS
 
 This flow preserves the source payload as-is for future normalization and staging work.
 
-The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command.
+The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command. By default the key is sent with Steam's `key` query parameter; set `STEAM_API_KEY_AUTH_LOCATION=header` only if you need to test the `x-webapi-key` header format.
 
 After raw ingestion, normalize the latest successful raw extract into staged Parquet:
 
@@ -149,6 +149,8 @@ Initialize the repository-local dbt profile, then run dbt:
 make dbt-init-profile
 make dbt-build
 ```
+
+The dbt workflow is repository-root based. The profile writes to `.local/game_market_analytics.duckdb`, and the Steam stage source reads `data/stage/steam/app_catalog/**/*.parquet`.
 
 Steam reviews can also be landed for a controlled app subset:
 
@@ -235,4 +237,4 @@ make dbt-test
 make dbt-build
 ```
 
-The `dbt-debug` target expects a local `dbt/profiles.yml`, which can be created from `dbt/profiles.example.yml`.
+The `dbt-debug` target expects a local `dbt/profiles.yml`, which can be created from `dbt/profiles.example.yml`. Direct dbt commands should be run from the repository root with `--project-dir dbt --profiles-dir dbt`.

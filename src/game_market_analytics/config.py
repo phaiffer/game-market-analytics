@@ -5,8 +5,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from game_market_analytics.paths import ProjectPaths, get_project_paths
+
+SteamApiKeyAuthLocation = Literal["query", "header"]
 
 
 @dataclass(frozen=True)
@@ -16,6 +19,7 @@ class LocalSettings:
     paths: ProjectPaths
     duckdb_path: Path
     steam_api_key: str | None = None
+    steam_api_key_auth_location: SteamApiKeyAuthLocation = "query"
 
 
 def _resolve_repo_path(value: str, project_root: Path) -> Path:
@@ -45,6 +49,13 @@ def _get_setting(name: str, env_file_values: dict[str, str]) -> str | None:
     return os.getenv(name) or env_file_values.get(name) or None
 
 
+def _steam_auth_location(value: str | None) -> SteamApiKeyAuthLocation:
+    normalized = (value or "query").strip().lower()
+    if normalized not in ("query", "header"):
+        raise ValueError("STEAM_API_KEY_AUTH_LOCATION must be either 'query' or 'header'.")
+    return normalized
+
+
 def load_local_settings(paths: ProjectPaths | None = None) -> LocalSettings:
     """Load local settings without requiring a .env parser."""
 
@@ -58,9 +69,13 @@ def load_local_settings(paths: ProjectPaths | None = None) -> LocalSettings:
         else resolved_paths.duckdb_path
     )
     steam_api_key = _get_setting("STEAM_API_KEY", env_file_values)
+    steam_api_key_auth_location = _steam_auth_location(
+        _get_setting("STEAM_API_KEY_AUTH_LOCATION", env_file_values)
+    )
 
     return LocalSettings(
         paths=resolved_paths,
         duckdb_path=duckdb_path,
         steam_api_key=steam_api_key,
+        steam_api_key_auth_location=steam_api_key_auth_location,
     )

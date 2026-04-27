@@ -7,7 +7,7 @@ sources:
       - name: app_catalog
         description: "Steam app catalog staged Parquet files produced from raw app catalog extracts."
         config:
-          external_location: "read_parquet('../data/stage/steam/app_catalog/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+          external_location: "read_parquet('data/stage/steam/app_catalog/**/*.parquet', union_by_name=true, hive_partitioning=false)"
         columns:
           - name: source_system
             description: "Source system identifier."

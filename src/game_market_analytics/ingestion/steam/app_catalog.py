@@ -10,6 +10,7 @@ from typing import Any, Protocol
 
 from game_market_analytics.ingestion.steam.client import (
     STEAM_APP_LIST_ENDPOINT,
+    SteamApiKeyAuthLocation,
     SteamClient,
     SteamClientError,
 )
@@ -134,6 +135,7 @@ def ingest_steam_app_catalog(
     paths: ProjectPaths,
     client: AppCatalogClient | None = None,
     steam_api_key: str | None = None,
+    steam_api_key_auth_location: SteamApiKeyAuthLocation = "query",
     now: datetime | None = None,
 ) -> SteamAppCatalogRunResult:
     """Fetch and land the raw Steam app catalog payload."""
@@ -146,7 +148,10 @@ def ingest_steam_app_catalog(
     metadata_file_path = run_dir / "metadata.json"
 
     try:
-        steam_client = client or SteamClient(api_key=steam_api_key or "")
+        steam_client = client or SteamClient(
+            api_key=steam_api_key or "",
+            api_key_auth_location=steam_api_key_auth_location,
+        )
         payload = steam_client.fetch_app_list()
     except SteamClientError as exc:
         metadata = build_metadata(
