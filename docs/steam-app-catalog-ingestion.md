@@ -6,7 +6,13 @@ The first implemented source onboarding flow is the Steam application catalog ra
 
 The command fetches the official Steam app list payload and stores the raw JSON response locally. It also writes a small metadata file for the run.
 
-The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command. The default authentication format sends the key as Steam's `key` query parameter.
+The current official Steam Web API app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` and `STEAM_API_KEY_AUTH_LOCATION=query` in your shell or local `.env` file before running the command. The default authentication format sends the key as Steam's `key` query parameter.
+
+The catalog client uses:
+
+```text
+https://api.steampowered.com/IStoreService/GetAppList/v1/
+```
 
 Optional header mode is available for compatibility checks:
 

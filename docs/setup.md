@@ -103,13 +103,14 @@ Or:
 make ingest-steam-app-catalog
 ```
 
-The current official Steam Store app list endpoint requires a Steam Web API key. Add it to your active shell or local `.env` file:
+The current official Steam Web API app list endpoint requires a Steam Web API key. Add it to your active shell or local `.env` file:
 
 ```powershell
 $env:STEAM_API_KEY = "your-key-here"
+$env:STEAM_API_KEY_AUTH_LOCATION = "query"
 ```
 
-The default authentication format sends the key as Steam's `key` query parameter. If you need to test header-based authentication, set:
+The default and expected local authentication format sends the key as Steam's `key` query parameter. If you need to test header-based authentication, set:
 
 ```powershell
 $env:STEAM_API_KEY_AUTH_LOCATION = "header"
@@ -117,7 +118,7 @@ $env:STEAM_API_KEY_AUTH_LOCATION = "header"
 
 Valid values are `query` and `header`. The header mode sends the key as `x-webapi-key`.
 
-The command fetches the app catalog endpoint, writes the raw JSON response, and writes run metadata next to the payload.
+The command fetches `https://api.steampowered.com/IStoreService/GetAppList/v1/`, writes the raw JSON response, and writes run metadata next to the payload.
 
 Successful runs land under:
 

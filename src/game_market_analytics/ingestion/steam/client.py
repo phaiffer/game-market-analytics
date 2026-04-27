@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
-STEAM_APP_LIST_ENDPOINT = "https://partner.steam-api.com/IStoreService/GetAppList/v1/"
+STEAM_APP_LIST_ENDPOINT = "https://api.steampowered.com/IStoreService/GetAppList/v1/"
 SteamApiKeyAuthLocation = Literal["query", "header"]
 
 

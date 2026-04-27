@@ -112,7 +112,7 @@ data/raw/steam/app_catalog/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSS
 
 This flow preserves the source payload as-is for future normalization and staging work.
 
-The current official Steam Store app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` in your shell or local `.env` file before running the command. By default the key is sent with Steam's `key` query parameter; set `STEAM_API_KEY_AUTH_LOCATION=header` only if you need to test the `x-webapi-key` header format.
+The current official Steam Web API app list endpoint requires a Steam Web API key. Set `STEAM_API_KEY` and `STEAM_API_KEY_AUTH_LOCATION=query` in your shell or local `.env` file before running the command. By default the key is sent with Steam's `key` query parameter; set `STEAM_API_KEY_AUTH_LOCATION=header` only if you need to test the `x-webapi-key` header format.
 
 After raw ingestion, normalize the latest successful raw extract into staged Parquet:
 
