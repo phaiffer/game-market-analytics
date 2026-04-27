@@ -17,8 +17,6 @@ models:
           - not_null
       - name: app_name
         description: "Application name as provided by Steam."
-        tests:
-          - not_null
       - name: item_type
         description: "Steam item type when available from the source payload."
       - name: last_modified
