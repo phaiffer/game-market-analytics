@@ -294,9 +294,16 @@ The first dbt models are:
 - `int_steam__app_catalog_latest`: selects the latest available record per Steam app ID.
 - `stg_steam__reviews`: reads staged Steam reviews Parquet.
 - `int_steam__review_summary_latest`: summarizes the latest review snapshot per Steam app ID.
+- `mart_steam__catalog_reputation_current`: joins the current Steam catalog to latest review reputation metrics.
 
 These models read from staged Parquet under `data/stage/steam/` relative to the repository root and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
 
+To build only the current catalog + reputation mart and its dependencies:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_reputation_current
+```
+
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, initial dbt models over staged catalog Parquet, controlled raw Steam reviews ingestion, and Steam reviews stage normalization. It does not ingest IGDB or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, and a Steam-only catalog + reputation mart. It does not ingest IGDB or IsThereAnyDeal data yet.

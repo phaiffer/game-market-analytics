@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: mart_steam__catalog_reputation_current
+    description: "Current Steam catalog enriched with the latest available review reputation summary."
+    columns:
+      - name: source_app_id
+        description: "Steam application identifier. This is the grain of the mart."
+        tests:
+          - not_null
+          - unique
+      - name: source_system
+        description: "Source system identifier from the catalog record."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["steam"]
+      - name: app_name
+        description: "Latest available Steam application name."
+        tests:
+          - not_null
+      - name: item_type
+        description: "Latest available Steam item type."
+      - name: extract_date
+        description: "Catalog extract date for the selected current catalog record."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Catalog run timestamp for the selected current catalog record."
+        tests:
+          - not_null
+      - name: review_extract_date
+        description: "Review extract date for the latest matched review summary, when available."
+      - name: review_run_timestamp
+        description: "Review run timestamp for the latest matched review summary, when available."
+      - name: has_reviews
+        description: "True when a latest review summary exists for the catalog app."
+        tests:
+          - not_null
+      - name: total_reviews
+        description: "Total reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: positive_reviews
+        description: "Positive reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: negative_reviews
+        description: "Negative reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: positive_review_ratio
+        description: "Positive review share among reviews with a known positive or negative vote."
+      - name: reviews_with_text
+        description: "Reviews with nonblank review text in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: avg_votes_up
+        description: "Average helpful votes in the latest matched review snapshot."
+      - name: avg_votes_funny
+        description: "Average funny votes in the latest matched review snapshot."
+      - name: avg_weighted_vote_score
+        description: "Average Steam weighted vote score in the latest matched review snapshot."
+      - name: latest_review_created_at
+        description: "Latest review creation timestamp in the latest matched review snapshot."
+      - name: latest_review_updated_at
+        description: "Latest review update timestamp in the latest matched review snapshot."
+      - name: review_volume_bucket
+        description: "Simple review volume bucket for portfolio-friendly analysis."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["no_reviews", "1_9", "10_99", "100_999", "1000_plus"]

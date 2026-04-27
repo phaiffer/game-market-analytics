@@ -182,6 +182,10 @@ The first review dbt models read this staged Parquet dataset:
 - `stg_steam__reviews`: source-shaped review staging model.
 - `int_steam__review_summary_latest`: latest review summary per Steam app ID.
 
+The first Steam-only mart joins catalog and reputation:
+
+- `mart_steam__catalog_reputation_current`: one current row per Steam app with latest catalog fields and latest review summary metrics.
+
 ## Local Setup
 
 The local development baseline now includes a small CLI for setup and validation. See `docs/setup.md` for the full walkthrough.
@@ -209,7 +213,7 @@ This file is ignored by Git and is intended for future local dbt and DuckDB deve
 Future phases may add:
 
 - Additional Steam endpoints such as review aggregates.
-- Broader Steam review/reputation marts.
+- Broader Steam review/reputation marts and historical trend models.
 - Source-specific ingestion clients for IGDB.
 - Broader business marts over the Steam catalog.
 - Entity matching and conformed game/company dimensions.
