@@ -21,6 +21,10 @@ from game_market_analytics.ingestion.steam.stage_app_catalog import (
     SteamAppCatalogStageError,
     stage_steam_app_catalog,
 )
+from game_market_analytics.ingestion.steam.stage_reviews import (
+    SteamReviewsStageError,
+    stage_steam_reviews,
+)
 
 
 def _format_path(path: Path) -> str:
@@ -106,6 +110,41 @@ def _stage_steam_app_catalog(settings: LocalSettings, raw_file: str | None = Non
     return 0
 
 
+def _stage_steam_reviews(
+    settings: LocalSettings,
+    *,
+    app_id: int | None = None,
+    raw_path: str | None = None,
+) -> int:
+    for directory in settings.paths.writable_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        results = stage_steam_reviews(
+            paths=settings.paths,
+            app_id=app_id,
+            raw_path=Path(raw_path) if raw_path else None,
+        )
+    except SteamReviewsStageError as exc:
+        print(f"Steam reviews staging failed: {exc}")
+        return 1
+
+    print("Steam reviews staging completed.")
+    for result in results:
+        print(
+            " ".join(
+                [
+                    f"app_id={result.app_id}",
+                    f"row_count={result.row_count}",
+                    f"pages_processed={result.pages_processed}",
+                    f"staged_output_path={_format_path(result.staged_output_path)}",
+                    f"metadata_file_path={_format_path(result.metadata_file_path)}",
+                ]
+            )
+        )
+    return 0
+
+
 def _ingest_steam_reviews(
     settings: LocalSettings,
     *,
@@ -188,6 +227,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--raw-file",
         help="Optional path to a specific raw app_catalog.json file.",
     )
+    reviews_stage_parser = subparsers.add_parser(
+        "stage-steam-reviews",
+        help="Normalize raw Steam review extracts into staged Parquet.",
+    )
+    reviews_stage_parser.add_argument(
+        "--app-id",
+        type=int,
+        help="Optional Steam app ID. Defaults to all latest successful raw review runs.",
+    )
+    reviews_stage_parser.add_argument(
+        "--raw-path",
+        help="Optional path to a raw review run directory or reviews_page_*.json file.",
+    )
     reviews_parser = subparsers.add_parser(
         "ingest-steam-reviews",
         help="Fetch and land raw Steam reviews for a controlled set of app IDs.",
@@ -245,6 +297,8 @@ def main(argv: list[str] | None = None) -> int:
         return _ingest_steam_app_catalog(settings)
     if args.command == "stage-steam-app-catalog":
         return _stage_steam_app_catalog(settings, raw_file=args.raw_file)
+    if args.command == "stage-steam-reviews":
+        return _stage_steam_reviews(settings, app_id=args.app_id, raw_path=args.raw_path)
     if args.command == "ingest-steam-reviews":
         return _ingest_steam_reviews(
             settings,

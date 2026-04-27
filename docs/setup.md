@@ -161,7 +161,7 @@ data/raw/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYY
 
 Each app-specific run writes page-level JSON payloads and a `metadata.json` file. If one app fails, the command records failure metadata for that app and continues with the next app ID.
 
-This command does not normalize reviews, write review Parquet, or create dbt review models yet.
+This command lands raw review payloads only. Use the staging command below to write review Parquet.
 
 ## Stage the Steam App Catalog
 
@@ -197,6 +197,47 @@ metadata.json
 ```
 
 This command writes local Parquet only. It does not write to DuckDB tables or create dbt models.
+
+## Stage Steam Reviews
+
+After one or more successful raw review ingestion runs, normalize the latest successful run for each available app ID:
+
+```powershell
+game-market-analytics stage-steam-reviews
+```
+
+Or:
+
+```powershell
+make stage-steam-reviews
+```
+
+To stage one app ID:
+
+```powershell
+game-market-analytics stage-steam-reviews --app-id 570
+```
+
+To stage a specific raw run directory or page file:
+
+```powershell
+game-market-analytics stage-steam-reviews --raw-path data\raw\steam\reviews\app_id=570\extract_date=YYYY-MM-DD\run_timestamp=YYYYMMDDTHHMMSSZ
+```
+
+Staged output lands under:
+
+```text
+data/stage/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+The directory contains:
+
+```text
+reviews.parquet
+metadata.json
+```
+
+This command writes local Parquet only. It does not create dbt review models, join reviews to the app catalog, or calculate reputation metrics yet.
 
 ## dbt Profile Template
 
@@ -256,4 +297,4 @@ These models read from `data/stage/steam/app_catalog/**/*.parquet` relative to t
 
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, and initial dbt models over staged Parquet. It does not ingest Steam reviews, IGDB, or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, initial dbt models over staged catalog Parquet, controlled raw Steam reviews ingestion, and Steam reviews stage normalization. It does not ingest IGDB or IsThereAnyDeal data yet.

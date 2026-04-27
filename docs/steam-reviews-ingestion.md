@@ -2,7 +2,7 @@
 
 This flow lands raw Steam review payloads for a controlled set of Steam app IDs.
 
-It is intentionally scoped. The command does not crawl the full Steam catalog and does not normalize reviews into an analytical schema yet.
+It is intentionally scoped. The command does not crawl the full Steam catalog. Staging to local Parquet is handled by the separate Steam reviews staging flow.
 
 The flow uses Steam's documented `appreviews/<appid>` endpoint:
 
@@ -84,7 +84,6 @@ Invalid input, such as a non-integer app ID, stops before extraction begins.
 This flow intentionally does not:
 
 - ingest reviews for the full Steam catalog
-- normalize reviews to Parquet
 - create dbt review models
 - join reviews to the app catalog
 - calculate reputation metrics
