@@ -1,6 +1,6 @@
 # Steam Reviews Staging
 
-This flow normalizes raw Steam review page payloads into app-partitioned Parquet files for future dbt review models and reputation analytics.
+This flow normalizes raw Steam review page payloads into app-partitioned Parquet files for dbt review models and future reputation analytics.
 
 It preserves source meaning and keeps review text as source-provided text. It does not perform sentiment analysis, language normalization, review aggregation, or joins to the Steam app catalog.
 
@@ -90,7 +90,6 @@ The staged dataset includes:
 
 This flow intentionally does not:
 
-- create dbt sources or review models
 - deduplicate reviews across multiple extracts
 - calculate review or reputation metrics
 - join reviews to `int_steam__app_catalog_latest`

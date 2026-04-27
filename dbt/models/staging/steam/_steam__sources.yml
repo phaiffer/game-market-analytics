@@ -29,3 +29,52 @@ sources:
             description: "Path to the raw JSON payload used to create the staged row."
           - name: ingestion_status
             description: "Status recorded by the raw ingestion flow."
+      - name: reviews
+        description: "Steam reviews staged Parquet files produced from raw review page extracts."
+        config:
+          external_location: "read_parquet('data/stage/steam/reviews/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: source_system
+            description: "Source system identifier."
+          - name: source_app_id
+            description: "Steam application identifier."
+          - name: review_id
+            description: "Steam recommendation identifier for the review."
+          - name: review_text
+            description: "Review text as provided by Steam."
+          - name: language
+            description: "Steam review language value."
+          - name: review_score_desc
+            description: "Steam review score description from the page summary."
+          - name: voted_up
+            description: "Whether the review recommends the app."
+          - name: votes_up
+            description: "Helpful vote count."
+          - name: votes_funny
+            description: "Funny vote count."
+          - name: weighted_vote_score
+            description: "Steam weighted vote score."
+          - name: steam_purchase
+            description: "Whether Steam marks the review as a Steam purchase."
+          - name: received_for_free
+            description: "Whether the reviewer marked the app as received for free."
+          - name: written_during_early_access
+            description: "Whether the review was written during early access."
+          - name: author_steamid
+            description: "Steam author identifier when available."
+          - name: author_num_games_owned
+            description: "Author game ownership count when available."
+          - name: author_num_reviews
+            description: "Author review count when available."
+          - name: review_created_at
+            description: "Review creation timestamp."
+          - name: review_updated_at
+            description: "Review update timestamp."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON page used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."

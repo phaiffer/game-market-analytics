@@ -177,7 +177,10 @@ The staged review dataset lands under:
 data/stage/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/reviews.parquet
 ```
 
-Review dbt models are intentionally deferred.
+The first review dbt models read this staged Parquet dataset:
+
+- `stg_steam__reviews`: source-shaped review staging model.
+- `int_steam__review_summary_latest`: latest review summary per Steam app ID.
 
 ## Local Setup
 
@@ -206,7 +209,7 @@ This file is ignored by Git and is intended for future local dbt and DuckDB deve
 Future phases may add:
 
 - Additional Steam endpoints such as review aggregates.
-- Steam review stage normalization and review/reputation models.
+- Broader Steam review/reputation marts.
 - Source-specific ingestion clients for IGDB.
 - Broader business marts over the Steam catalog.
 - Entity matching and conformed game/company dimensions.

@@ -237,7 +237,7 @@ reviews.parquet
 metadata.json
 ```
 
-This command writes local Parquet only. It does not create dbt review models, join reviews to the app catalog, or calculate reputation metrics yet.
+This command writes local Parquet only. It does not join reviews to the app catalog or calculate final reputation marts yet.
 
 ## dbt Profile Template
 
@@ -292,8 +292,10 @@ The first dbt models are:
 
 - `stg_steam__app_catalog`: reads staged Steam app catalog Parquet.
 - `int_steam__app_catalog_latest`: selects the latest available record per Steam app ID.
+- `stg_steam__reviews`: reads staged Steam reviews Parquet.
+- `int_steam__review_summary_latest`: summarizes the latest review snapshot per Steam app ID.
 
-These models read from `data/stage/steam/app_catalog/**/*.parquet` relative to the repository root and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
+These models read from staged Parquet under `data/stage/steam/` relative to the repository root and write dbt relations into the local DuckDB database configured by `dbt/profiles.yml`.
 
 ## Current Scope
 

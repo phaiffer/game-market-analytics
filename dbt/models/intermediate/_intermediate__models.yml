@@ -45,3 +45,54 @@ models:
           - accepted_values:
               arguments:
                 values: ["success"]
+  - name: int_steam__review_summary_latest
+    description: "Latest available Steam review summary per source app ID."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["steam"]
+      - name: source_app_id
+        description: "Steam application identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: extract_date
+        description: "Extract date for the selected latest review snapshot."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Run timestamp for the selected latest review snapshot."
+        tests:
+          - not_null
+      - name: total_reviews
+        description: "Total staged reviews in the latest snapshot."
+        tests:
+          - not_null
+      - name: positive_reviews
+        description: "Reviews marked as positive in the latest snapshot."
+        tests:
+          - not_null
+      - name: negative_reviews
+        description: "Reviews marked as negative in the latest snapshot."
+        tests:
+          - not_null
+      - name: positive_review_ratio
+        description: "Positive review share among reviews with a known positive or negative vote."
+      - name: reviews_with_text
+        description: "Reviews with nonblank review text in the latest snapshot."
+        tests:
+          - not_null
+      - name: avg_votes_up
+        description: "Average helpful votes across reviews in the latest snapshot."
+      - name: avg_votes_funny
+        description: "Average funny votes across reviews in the latest snapshot."
+      - name: avg_weighted_vote_score
+        description: "Average Steam weighted vote score across reviews in the latest snapshot."
+      - name: latest_review_created_at
+        description: "Latest review creation timestamp in the latest snapshot."
+      - name: latest_review_updated_at
+        description: "Latest review update timestamp in the latest snapshot."
