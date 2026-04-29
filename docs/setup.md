@@ -198,6 +198,50 @@ Each title-specific run writes `games_search.json`, `metadata.json`, and, when a
 
 This command lands raw IGDB payloads only. It does not stage IGDB data, create dbt models, map Steam apps to IGDB games, or update the Steam-only mart.
 
+## Stage IGDB Reference Data
+
+After one or more successful raw IGDB reference runs, normalize the latest successful raw run for each available title slug:
+
+```powershell
+game-market-analytics stage-igdb-reference
+```
+
+To stage a single title:
+
+```powershell
+game-market-analytics stage-igdb-reference --title "Counter-Strike 2"
+```
+
+To stage a specific raw run directory or payload file:
+
+```powershell
+game-market-analytics stage-igdb-reference --raw-path data\raw\igdb\reference\title_slug=counter-strike-2\extract_date=YYYY-MM-DD\run_timestamp=YYYYMMDDTHHMMSSZ
+```
+
+Staged outputs land under:
+
+```text
+data/stage/igdb/reference/<ENTITY_NAME>/title_slug=<TITLE_SLUG>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+Each entity-specific directory contains:
+
+```text
+<entity_name>.parquet
+metadata.json
+```
+
+Current staged entities are:
+
+- `games`
+- `involved_companies`
+- `companies`
+- `genres`
+- `platforms`
+- `release_dates`
+
+This command writes local Parquet only. It does not create dbt models, resolve Steam app IDs to IGDB game IDs, or enrich the final Steam mart.
+
 ## Stage the Steam App Catalog
 
 After a successful raw ingestion run, normalize the latest successful raw extract:
@@ -343,4 +387,4 @@ The validated Steam-only MVP examples use review app IDs `570` and `730`.
 
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, and controlled raw IGDB reference ingestion. It does not stage IGDB data or ingest IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, and IGDB reference stage normalization. It does not create dbt models for IGDB or ingest IsThereAnyDeal data yet.
