@@ -20,6 +20,8 @@ class LocalSettings:
     duckdb_path: Path
     steam_api_key: str | None = None
     steam_api_key_auth_location: SteamApiKeyAuthLocation = "query"
+    igdb_client_id: str | None = None
+    igdb_client_secret: str | None = None
 
 
 def _resolve_repo_path(value: str, project_root: Path) -> Path:
@@ -72,10 +74,14 @@ def load_local_settings(paths: ProjectPaths | None = None) -> LocalSettings:
     steam_api_key_auth_location = _steam_auth_location(
         _get_setting("STEAM_API_KEY_AUTH_LOCATION", env_file_values)
     )
+    igdb_client_id = _get_setting("IGDB_CLIENT_ID", env_file_values)
+    igdb_client_secret = _get_setting("IGDB_CLIENT_SECRET", env_file_values)
 
     return LocalSettings(
         paths=resolved_paths,
         duckdb_path=duckdb_path,
         steam_api_key=steam_api_key,
         steam_api_key_auth_location=steam_api_key_auth_location,
+        igdb_client_id=igdb_client_id,
+        igdb_client_secret=igdb_client_secret,
     )

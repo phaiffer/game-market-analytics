@@ -45,7 +45,7 @@ Copy `.env.example` to `.env` for local use:
 Copy-Item .env.example .env
 ```
 
-`STEAM_API_KEY` is used by the Steam app catalog ingestion flow. The IGDB and IsThereAnyDeal credential values remain placeholders for future source integrations.
+`STEAM_API_KEY` is used by the Steam app catalog ingestion flow. `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` are used by the controlled IGDB reference ingestion flow. The IsThereAnyDeal credential value remains a placeholder for a future source integration.
 
 The default local DuckDB convention is:
 
@@ -162,6 +162,41 @@ data/raw/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYY
 Each app-specific run writes page-level JSON payloads and a `metadata.json` file. If one app fails, the command records failure metadata for that app and continues with the next app ID.
 
 This command lands raw review payloads only. Use the staging command below to write review Parquet.
+
+## Run Controlled IGDB Reference Ingestion
+
+IGDB reference ingestion is title-driven and intentionally controlled. It searches IGDB for explicit curated game titles, writes the raw search response, and fetches related raw entity payloads only when a clean candidate can be selected.
+
+Set Twitch/IGDB client credentials in your active shell or local `.env` file:
+
+```powershell
+$env:IGDB_CLIENT_ID = "your-client-id"
+$env:IGDB_CLIENT_SECRET = "your-client-secret"
+```
+
+Repeated titles:
+
+```powershell
+game-market-analytics ingest-igdb-reference --title "Dota 2" --title "Counter-Strike 2"
+```
+
+Input file:
+
+```powershell
+game-market-analytics ingest-igdb-reference --input-file .local\igdb_titles.txt
+```
+
+The input file should contain one game title per line. Blank lines are ignored. Repeated titles are deduplicated before ingestion.
+
+Raw files land under:
+
+```text
+data/raw/igdb/reference/title_slug=<TITLE_SLUG>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+Each title-specific run writes `games_search.json`, `metadata.json`, and, when a clean candidate is selected, related files such as `game_details.json`, `involved_companies.json`, `companies.json`, `genres.json`, `platforms.json`, and `release_dates.json`.
+
+This command lands raw IGDB payloads only. It does not stage IGDB data, create dbt models, map Steam apps to IGDB games, or update the Steam-only mart.
 
 ## Stage the Steam App Catalog
 
@@ -308,4 +343,4 @@ The validated Steam-only MVP examples use review app IDs `570` and `730`.
 
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, and a Steam-only catalog + reputation mart. It does not ingest IGDB or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, and controlled raw IGDB reference ingestion. It does not stage IGDB data or ingest IsThereAnyDeal data yet.

@@ -4,6 +4,8 @@ Local-first data engineering and analytics engineering project for Steam game ma
 
 This repository implements a Steam-only MVP that ingests real Steam data, lands raw source payloads, normalizes them into staged Parquet datasets, models them with dbt and DuckDB, and publishes a first business-facing catalog + reputation mart.
 
+Phase 2 has started with a controlled IGDB raw reference ingestion foundation. This new step lands raw IGDB payloads for curated game titles only; IGDB staging, dbt models, and Steam-to-IGDB mapping are intentionally deferred.
+
 The project is intentionally portfolio-oriented: the implementation is small enough to inspect, but complete enough to show realistic ingestion, staging, modeling, testing, and analytical output.
 
 ## Project Overview
@@ -29,13 +31,15 @@ Implemented now:
 - dbt staging models for catalog and reviews.
 - dbt intermediate models for latest catalog records and latest review summaries.
 - Final Steam-only mart: `mart_steam__catalog_reputation_current`.
+- Controlled IGDB raw reference ingestion for curated titles.
 - Local DuckDB execution through a repository-local profile.
 - Unit tests for Python ingestion/staging utilities.
 - dbt tests for staging, intermediate, and mart models.
 
 Deferred for later phases:
 
-- IGDB enrichment for genres, platforms, companies, publishers, and richer metadata.
+- IGDB staging and dbt models for genres, platforms, companies, publishers, and richer metadata.
+- Controlled Steam-to-IGDB entity resolution.
 - IsThereAnyDeal pricing and discount history.
 - Historical trend marts and snapshots.
 - Full-catalog review crawling.
@@ -82,6 +86,7 @@ Raw landing:
 ```text
 data/raw/steam/app_catalog/
 data/raw/steam/reviews/
+data/raw/igdb/reference/
 ```
 
 Staged Parquet:
@@ -187,6 +192,13 @@ $env:STEAM_API_KEY = "your-key-here"
 $env:STEAM_API_KEY_AUTH_LOCATION = "query"
 ```
 
+IGDB reference ingestion requires Twitch/IGDB client credentials:
+
+```powershell
+$env:IGDB_CLIENT_ID = "your-client-id"
+$env:IGDB_CLIENT_SECRET = "your-client-secret"
+```
+
 The repository-local DuckDB convention is:
 
 ```text
@@ -198,10 +210,33 @@ For the complete local workflow, see `docs/setup.md`.
 ## Current Limitations
 
 - Review ingestion is controlled by explicit app IDs and is not a full-catalog review crawler.
+- IGDB ingestion is controlled by explicit titles and is not automatic Steam-to-IGDB mapping.
 - The current validated review examples cover app IDs `570` and `730`.
 - Review summaries represent the latest staged snapshot available locally.
-- The final mart is Steam-only and does not yet include genres, platforms, publishers, developers, pricing, or external enrichment.
+- The final mart is Steam-only and does not yet include IGDB genres, platforms, publishers, developers, pricing, or external enrichment.
 - No dashboards or notebooks are included in the implemented MVP.
+
+## IGDB Reference Ingestion
+
+Curated titles can be landed as raw IGDB reference payloads:
+
+```powershell
+game-market-analytics ingest-igdb-reference --title "Dota 2" --title "Counter-Strike 2"
+```
+
+Or from a one-title-per-line file:
+
+```powershell
+game-market-analytics ingest-igdb-reference --input-file .local\igdb_titles.txt
+```
+
+Each title lands under:
+
+```text
+data/raw/igdb/reference/title_slug=<TITLE_SLUG>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+See `docs/igdb-reference-ingestion.md` for the detailed scope and file convention.
 
 ## Next Planned Phase
 
