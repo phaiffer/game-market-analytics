@@ -6,6 +6,8 @@
 
 The mart gives one current-state row per Steam app with catalog identity and review reputation metrics in the same relation. It is intended for portfolio-friendly exploration and as a base for future catalog + reputation analysis.
 
+The current validated example review coverage uses Steam app IDs `570` and `730`.
+
 ## Grain
 
 One row per `source_app_id`.

@@ -304,6 +304,8 @@ To build only the current catalog + reputation mart and its dependencies:
 dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_reputation_current
 ```
 
+The validated Steam-only MVP examples use review app IDs `570` and `730`.
+
 ## Current Scope
 
 The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, and a Steam-only catalog + reputation mart. It does not ingest IGDB or IsThereAnyDeal data yet.
