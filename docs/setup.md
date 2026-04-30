@@ -385,6 +385,41 @@ dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_rep
 
 The validated Steam-only MVP examples use review app IDs `570` and `730`.
 
+## Run dbt Models for IGDB Reference Data
+
+After `game-market-analytics stage-igdb-reference` has produced staged IGDB Parquet files, run:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select stg_igdb__games stg_igdb__involved_companies stg_igdb__companies stg_igdb__genres stg_igdb__platforms stg_igdb__release_dates int_igdb__games_latest_by_title
+```
+
+The IGDB dbt layer includes:
+
+- `stg_igdb__games`: source-shaped game reference rows.
+- `stg_igdb__involved_companies`: source-shaped game-company relationship rows.
+- `stg_igdb__companies`: source-shaped company rows.
+- `stg_igdb__genres`: source-shaped genre rows.
+- `stg_igdb__platforms`: source-shaped platform rows.
+- `stg_igdb__release_dates`: source-shaped release date rows.
+- `int_igdb__games_latest_by_title`: latest available IGDB game reference row per curated title slug.
+
+These models read staged Parquet under `data/stage/igdb/reference/` and write dbt views into the local DuckDB database. They do not create Steam-to-IGDB mappings or enrich the Steam-only mart.
+
+## Run dbt Steam-to-IGDB Crosswalk
+
+After Steam catalog dbt models and IGDB reference dbt models are available, build the deterministic crosswalk:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +int_crosswalk__steam_to_igdb_reference
+```
+
+The crosswalk layer includes:
+
+- `int_steam__app_catalog_latest_titles`: latest Steam catalog records with deterministic title keys.
+- `int_crosswalk__steam_to_igdb_reference`: one row per matched Steam app ID using conservative title-level matching.
+
+This command does not enrich `mart_steam__catalog_reputation_current`. It only creates an auditable intermediate mapping foundation for future enrichment work.
+
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, and IGDB reference stage normalization. It does not create dbt models for IGDB or ingest IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, IGDB reference stage normalization, IGDB dbt staging models, and a deterministic Steam-to-IGDB crosswalk foundation. It does not enrich the Steam mart with IGDB data or ingest IsThereAnyDeal data yet.

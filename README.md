@@ -29,7 +29,10 @@ Implemented now:
 - Stage normalization to Parquet under `data/stage/`.
 - dbt sources over staged Parquet.
 - dbt staging models for catalog and reviews.
+- dbt sources and staging models for IGDB reference datasets.
 - dbt intermediate models for latest catalog records and latest review summaries.
+- IGDB helper model for the latest game reference row per curated title.
+- Controlled Steam-to-IGDB title crosswalk foundation.
 - Final Steam-only mart: `mart_steam__catalog_reputation_current`.
 - Controlled IGDB raw reference ingestion for curated titles.
 - IGDB reference stage normalization to Parquet datasets.
@@ -40,7 +43,7 @@ Implemented now:
 Deferred for later phases:
 
 - dbt models for IGDB genres, platforms, companies, publishers, and richer metadata.
-- Controlled Steam-to-IGDB entity resolution.
+- Manual override mappings and broader Steam-to-IGDB entity resolution.
 - IsThereAnyDeal pricing and discount history.
 - Historical trend marts and snapshots.
 - Full-catalog review crawling.
@@ -102,11 +105,20 @@ dbt staging:
 
 - `stg_steam__app_catalog`
 - `stg_steam__reviews`
+- `stg_igdb__games`
+- `stg_igdb__involved_companies`
+- `stg_igdb__companies`
+- `stg_igdb__genres`
+- `stg_igdb__platforms`
+- `stg_igdb__release_dates`
 
 dbt intermediate:
 
 - `int_steam__app_catalog_latest`
+- `int_steam__app_catalog_latest_titles`
 - `int_steam__review_summary_latest`
+- `int_igdb__games_latest_by_title`
+- `int_crosswalk__steam_to_igdb_reference`
 
 dbt mart:
 
@@ -212,7 +224,7 @@ For the complete local workflow, see `docs/setup.md`.
 ## Current Limitations
 
 - Review ingestion is controlled by explicit app IDs and is not a full-catalog review crawler.
-- IGDB ingestion is controlled by explicit titles and is not automatic Steam-to-IGDB mapping.
+- IGDB ingestion is controlled by explicit titles and Steam-to-IGDB mapping is currently deterministic title matching only.
 - The current validated review examples cover app IDs `570` and `730`.
 - Review summaries represent the latest staged snapshot available locally.
 - The final mart is Steam-only and does not yet include staged IGDB genres, platforms, publishers, developers, pricing, or external enrichment.
@@ -261,6 +273,26 @@ data/stage/igdb/reference/<entity_name>/title_slug=<TITLE_SLUG>/extract_date=YYY
 ```
 
 Current staged entities are `games`, `involved_companies`, `companies`, `genres`, `platforms`, and `release_dates`. See `docs/igdb-reference-staging.md` for details.
+
+## dbt IGDB Reference Models
+
+After IGDB reference staging has produced Parquet files, build the IGDB dbt layer:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select stg_igdb__games stg_igdb__involved_companies stg_igdb__companies stg_igdb__genres stg_igdb__platforms stg_igdb__release_dates int_igdb__games_latest_by_title
+```
+
+This creates queryable DuckDB views over staged IGDB Parquet files. It does not map Steam apps to IGDB games or enrich the final Steam mart yet. See `docs/dbt-igdb-reference.md` for model details.
+
+## Steam To IGDB Crosswalk
+
+Build the controlled title-level crosswalk and its dependencies:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +int_crosswalk__steam_to_igdb_reference
+```
+
+The crosswalk creates one row per matched Steam `source_app_id` using conservative deterministic matching against the curated IGDB latest-by-title helper. It currently supports exact normalized title matches and exact slug-style matches only. See `docs/dbt-steam-igdb-crosswalk.md` for details.
 
 ## Next Planned Phase
 

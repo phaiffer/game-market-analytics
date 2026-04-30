@@ -1,0 +1,196 @@
+version: 2
+
+sources:
+  - name: igdb_stage
+    description: "Locally staged IGDB reference datasets written by the Python normalization flow."
+    tables:
+      - name: games
+        description: "IGDB game reference staged Parquet files produced from raw game details payloads."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/games/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: igdb_game_id
+            description: "IGDB game identifier."
+          - name: game_name
+            description: "Game name as provided by IGDB."
+          - name: slug
+            description: "IGDB game slug."
+          - name: first_release_date
+            description: "IGDB first release timestamp when available."
+          - name: aggregated_rating
+            description: "Aggregated IGDB rating when available."
+          - name: aggregated_rating_count
+            description: "Count behind the aggregated IGDB rating when available."
+          - name: category
+            description: "IGDB game category value when available."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."
+      - name: involved_companies
+        description: "IGDB involved company staged Parquet files."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/involved_companies/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: involved_company_id
+            description: "IGDB involved company relationship identifier."
+          - name: igdb_game_id
+            description: "IGDB game identifier."
+          - name: company_id
+            description: "IGDB company identifier."
+          - name: developer_flag
+            description: "Whether the company is marked as a developer."
+          - name: publisher_flag
+            description: "Whether the company is marked as a publisher."
+          - name: supporting_flag
+            description: "Whether the company is marked as supporting."
+          - name: porting_flag
+            description: "Whether the company is marked as porting."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."
+      - name: companies
+        description: "IGDB company staged Parquet files."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/companies/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: company_id
+            description: "IGDB company identifier."
+          - name: company_name
+            description: "Company name as provided by IGDB."
+          - name: slug
+            description: "IGDB company slug."
+          - name: country
+            description: "IGDB country code when available."
+          - name: start_date
+            description: "IGDB company start timestamp when available."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."
+      - name: genres
+        description: "IGDB genre staged Parquet files."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/genres/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: genre_id
+            description: "IGDB genre identifier."
+          - name: genre_name
+            description: "Genre name as provided by IGDB."
+          - name: slug
+            description: "IGDB genre slug."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."
+      - name: platforms
+        description: "IGDB platform staged Parquet files."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/platforms/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: platform_id
+            description: "IGDB platform identifier."
+          - name: platform_name
+            description: "Platform name as provided by IGDB."
+          - name: slug
+            description: "IGDB platform slug."
+          - name: category
+            description: "IGDB platform category when available."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."
+      - name: release_dates
+        description: "IGDB release date staged Parquet files."
+        config:
+          external_location: "read_parquet('data/stage/igdb/reference/release_dates/**/*.parquet', union_by_name=true, hive_partitioning=false)"
+        columns:
+          - name: release_date_id
+            description: "IGDB release date identifier."
+          - name: igdb_game_id
+            description: "IGDB game identifier."
+          - name: platform_id
+            description: "IGDB platform identifier when available."
+          - name: region
+            description: "IGDB release region when available."
+          - name: release_date_timestamp
+            description: "IGDB release timestamp when available."
+          - name: human
+            description: "Human-readable release date text from IGDB."
+          - name: input_title
+            description: "Curated title supplied to the raw ingestion flow."
+          - name: title_slug
+            description: "Normalized title slug used for raw and staged partitions."
+          - name: selected_igdb_game_id
+            description: "IGDB game selected by the raw ingestion flow."
+          - name: extract_date
+            description: "Raw extract date partition."
+          - name: run_timestamp
+            description: "Raw ingestion run timestamp."
+          - name: raw_file_path
+            description: "Path to the raw JSON payload used to create the staged row."
+          - name: ingestion_status
+            description: "Status recorded by the raw ingestion flow."
+          - name: staging_status
+            description: "Status recorded by the stage normalization flow."

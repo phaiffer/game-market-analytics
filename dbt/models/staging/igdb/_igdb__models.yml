@@ -1,0 +1,370 @@
+version: 2
+
+models:
+  - name: stg_igdb__games
+    description: "Source-shaped staging model for IGDB game reference rows from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: igdb_game_id
+        description: "IGDB game identifier."
+        tests:
+          - not_null
+      - name: game_name
+        description: "Game name as provided by IGDB."
+      - name: slug
+        description: "IGDB game slug."
+      - name: first_release_date
+        description: "IGDB first release timestamp when available."
+      - name: aggregated_rating
+        description: "Aggregated IGDB rating when available."
+      - name: aggregated_rating_count
+        description: "Count behind the aggregated IGDB rating when available."
+      - name: category
+        description: "IGDB game category value when available."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: is_valid_game_reference
+        description: "True when the row has the minimum fields needed for title-level IGDB mapping."
+        tests:
+          - not_null
+
+  - name: stg_igdb__involved_companies
+    description: "Source-shaped staging model for IGDB game-company relationship rows."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: involved_company_id
+        description: "IGDB involved company relationship identifier."
+        tests:
+          - not_null
+      - name: igdb_game_id
+        description: "IGDB game identifier."
+        tests:
+          - not_null
+      - name: company_id
+        description: "IGDB company identifier."
+        tests:
+          - not_null
+      - name: developer_flag
+        description: "Whether the company is marked as a developer."
+      - name: publisher_flag
+        description: "Whether the company is marked as a publisher."
+      - name: supporting_flag
+        description: "Whether the company is marked as supporting."
+      - name: porting_flag
+        description: "Whether the company is marked as porting."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+
+  - name: stg_igdb__companies
+    description: "Source-shaped staging model for IGDB company rows from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: company_id
+        description: "IGDB company identifier."
+        tests:
+          - not_null
+      - name: company_name
+        description: "Company name as provided by IGDB."
+      - name: slug
+        description: "IGDB company slug."
+      - name: country
+        description: "IGDB country code when available."
+      - name: start_date
+        description: "IGDB company start timestamp when available."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+
+  - name: stg_igdb__genres
+    description: "Source-shaped staging model for IGDB genre rows from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: genre_id
+        description: "IGDB genre identifier."
+        tests:
+          - not_null
+      - name: genre_name
+        description: "Genre name as provided by IGDB."
+      - name: slug
+        description: "IGDB genre slug."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+
+  - name: stg_igdb__platforms
+    description: "Source-shaped staging model for IGDB platform rows from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: platform_id
+        description: "IGDB platform identifier."
+        tests:
+          - not_null
+      - name: platform_name
+        description: "Platform name as provided by IGDB."
+      - name: slug
+        description: "IGDB platform slug."
+      - name: category
+        description: "IGDB platform category when available."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+
+  - name: stg_igdb__release_dates
+    description: "Source-shaped staging model for IGDB release date rows from staged Parquet."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: release_date_id
+        description: "IGDB release date identifier."
+        tests:
+          - not_null
+      - name: igdb_game_id
+        description: "IGDB game identifier."
+        tests:
+          - not_null
+      - name: platform_id
+        description: "IGDB platform identifier when available."
+      - name: region
+        description: "IGDB release region when available."
+      - name: release_date_timestamp
+        description: "IGDB release timestamp when available."
+      - name: human
+        description: "Human-readable release date text from IGDB."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug used for raw and staged partitions."
+        tests:
+          - not_null
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Raw extract date partition."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Raw ingestion run timestamp."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Path to the raw JSON payload used to create the staged row."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Status recorded by the raw ingestion flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Status recorded by the stage normalization flow."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
