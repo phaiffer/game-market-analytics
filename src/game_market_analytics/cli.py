@@ -6,6 +6,17 @@ import argparse
 from pathlib import Path
 
 from game_market_analytics.config import LocalSettings, load_local_settings
+from game_market_analytics.ingestion.igdb.auth import IGDBAuthError
+from game_market_analytics.ingestion.igdb.client import IGDBClientError
+from game_market_analytics.ingestion.igdb.reference import (
+    IGDBReferenceInputError,
+    ingest_reference_batch,
+    parse_titles,
+)
+from game_market_analytics.ingestion.igdb.stage_reference import (
+    IGDBReferenceStageError,
+    stage_igdb_reference,
+)
 from game_market_analytics.ingestion.steam.app_catalog import ingest_steam_app_catalog
 from game_market_analytics.ingestion.steam.client import SteamClientError
 from game_market_analytics.ingestion.steam.reviews import (
@@ -196,6 +207,91 @@ def _ingest_steam_reviews(
     return 1 if any(result.status != "success" for result in results) else 0
 
 
+def _ingest_igdb_reference(
+    settings: LocalSettings,
+    *,
+    title_values: list[str] | None,
+    input_file: str | None,
+) -> int:
+    for directory in settings.paths.writable_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        titles = parse_titles(
+            title_values=title_values,
+            input_file=Path(input_file) if input_file else None,
+        )
+        results = ingest_reference_batch(
+            paths=settings.paths,
+            titles=titles,
+            client_id=settings.igdb_client_id,
+            client_secret=settings.igdb_client_secret,
+        )
+    except IGDBReferenceInputError as exc:
+        print(f"IGDB reference ingestion input error: {exc}")
+        return 2
+    except (IGDBAuthError, IGDBClientError) as exc:
+        print(f"IGDB reference ingestion failed: {exc}")
+        return 1
+
+    print("IGDB reference ingestion completed.")
+    for result in results:
+        print(
+            " ".join(
+                [
+                    f"title={result.input_title!r}",
+                    f"status={result.status}",
+                    f"candidate_game_count={result.candidate_game_count}",
+                    f"selected_game_id={result.selected_game_id}",
+                    f"files_written={len(result.files_written)}",
+                    f"metadata_file_path={_format_path(result.metadata_file_path)}",
+                ]
+            )
+        )
+
+    return 1 if any(result.status != "success" for result in results) else 0
+
+
+def _stage_igdb_reference(
+    settings: LocalSettings,
+    *,
+    title: str | None = None,
+    raw_path: str | None = None,
+) -> int:
+    for directory in settings.paths.writable_directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        results = stage_igdb_reference(
+            paths=settings.paths,
+            title=title,
+            raw_path=Path(raw_path) if raw_path else None,
+        )
+    except IGDBReferenceStageError as exc:
+        print(f"IGDB reference staging failed: {exc}")
+        return 1
+
+    print("IGDB reference staging completed.")
+    for result in results:
+        entity_summary = ",".join(
+            f"{entity_result.entity_name}:{entity_result.row_count}"
+            for entity_result in result.entity_results
+        )
+        print(
+            " ".join(
+                [
+                    f"title={result.input_title!r}",
+                    f"title_slug={result.title_slug}",
+                    f"run_timestamp={result.run_timestamp}",
+                    f"status={result.status}",
+                    f"entity_rows={entity_summary}",
+                ]
+            )
+        )
+
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="game-market-analytics",
@@ -277,6 +373,32 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["recent", "updated", "all"],
         help=f"Steam review sort/filter mode. Default: {DEFAULT_FILTER}.",
     )
+    igdb_parser = subparsers.add_parser(
+        "ingest-igdb-reference",
+        help="Fetch and land raw IGDB reference payloads for curated game titles.",
+    )
+    igdb_parser.add_argument(
+        "--title",
+        action="append",
+        dest="titles",
+        help="Game title to search in IGDB. Can be repeated.",
+    )
+    igdb_parser.add_argument(
+        "--input-file",
+        help="Text file with one game title per line.",
+    )
+    igdb_stage_parser = subparsers.add_parser(
+        "stage-igdb-reference",
+        help="Normalize raw IGDB reference extracts into staged Parquet datasets.",
+    )
+    igdb_stage_parser.add_argument(
+        "--title",
+        help="Optional game title. Defaults to all latest successful raw title runs.",
+    )
+    igdb_stage_parser.add_argument(
+        "--raw-path",
+        help="Optional path to a raw IGDB reference run directory or payload file.",
+    )
 
     return parser
 
@@ -308,6 +430,18 @@ def main(argv: list[str] | None = None) -> int:
             language=args.language,
             review_type=args.review_type,
             filter_value=args.filter,
+        )
+    if args.command == "ingest-igdb-reference":
+        return _ingest_igdb_reference(
+            settings,
+            title_values=args.titles,
+            input_file=args.input_file,
+        )
+    if args.command == "stage-igdb-reference":
+        return _stage_igdb_reference(
+            settings,
+            title=args.title,
+            raw_path=args.raw_path,
         )
 
     parser.error(f"Unknown command: {args.command}")

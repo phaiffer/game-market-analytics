@@ -45,7 +45,7 @@ Copy `.env.example` to `.env` for local use:
 Copy-Item .env.example .env
 ```
 
-`STEAM_API_KEY` is used by the Steam app catalog ingestion flow. The IGDB and IsThereAnyDeal credential values remain placeholders for future source integrations.
+`STEAM_API_KEY` is used by the Steam app catalog ingestion flow. `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` are used by the controlled IGDB reference ingestion flow. The IsThereAnyDeal credential value remains a placeholder for a future source integration.
 
 The default local DuckDB convention is:
 
@@ -162,6 +162,85 @@ data/raw/steam/reviews/app_id=<APP_ID>/extract_date=YYYY-MM-DD/run_timestamp=YYY
 Each app-specific run writes page-level JSON payloads and a `metadata.json` file. If one app fails, the command records failure metadata for that app and continues with the next app ID.
 
 This command lands raw review payloads only. Use the staging command below to write review Parquet.
+
+## Run Controlled IGDB Reference Ingestion
+
+IGDB reference ingestion is title-driven and intentionally controlled. It searches IGDB for explicit curated game titles, writes the raw search response, and fetches related raw entity payloads only when a clean candidate can be selected.
+
+Set Twitch/IGDB client credentials in your active shell or local `.env` file:
+
+```powershell
+$env:IGDB_CLIENT_ID = "your-client-id"
+$env:IGDB_CLIENT_SECRET = "your-client-secret"
+```
+
+Repeated titles:
+
+```powershell
+game-market-analytics ingest-igdb-reference --title "Dota 2" --title "Counter-Strike 2"
+```
+
+Input file:
+
+```powershell
+game-market-analytics ingest-igdb-reference --input-file .local\igdb_titles.txt
+```
+
+The input file should contain one game title per line. Blank lines are ignored. Repeated titles are deduplicated before ingestion.
+
+Raw files land under:
+
+```text
+data/raw/igdb/reference/title_slug=<TITLE_SLUG>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+Each title-specific run writes `games_search.json`, `metadata.json`, and, when a clean candidate is selected, related files such as `game_details.json`, `involved_companies.json`, `companies.json`, `genres.json`, `platforms.json`, and `release_dates.json`.
+
+This command lands raw IGDB payloads only. It does not stage IGDB data, create dbt models, map Steam apps to IGDB games, or update the Steam-only mart.
+
+## Stage IGDB Reference Data
+
+After one or more successful raw IGDB reference runs, normalize the latest successful raw run for each available title slug:
+
+```powershell
+game-market-analytics stage-igdb-reference
+```
+
+To stage a single title:
+
+```powershell
+game-market-analytics stage-igdb-reference --title "Counter-Strike 2"
+```
+
+To stage a specific raw run directory or payload file:
+
+```powershell
+game-market-analytics stage-igdb-reference --raw-path data\raw\igdb\reference\title_slug=counter-strike-2\extract_date=YYYY-MM-DD\run_timestamp=YYYYMMDDTHHMMSSZ
+```
+
+Staged outputs land under:
+
+```text
+data/stage/igdb/reference/<ENTITY_NAME>/title_slug=<TITLE_SLUG>/extract_date=YYYY-MM-DD/run_timestamp=YYYYMMDDTHHMMSSZ/
+```
+
+Each entity-specific directory contains:
+
+```text
+<entity_name>.parquet
+metadata.json
+```
+
+Current staged entities are:
+
+- `games`
+- `involved_companies`
+- `companies`
+- `genres`
+- `platforms`
+- `release_dates`
+
+This command writes local Parquet only. It does not create dbt models, resolve Steam app IDs to IGDB game IDs, or enrich the final Steam mart.
 
 ## Stage the Steam App Catalog
 
@@ -306,6 +385,41 @@ dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_rep
 
 The validated Steam-only MVP examples use review app IDs `570` and `730`.
 
+## Run dbt Models for IGDB Reference Data
+
+After `game-market-analytics stage-igdb-reference` has produced staged IGDB Parquet files, run:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select stg_igdb__games stg_igdb__involved_companies stg_igdb__companies stg_igdb__genres stg_igdb__platforms stg_igdb__release_dates int_igdb__games_latest_by_title
+```
+
+The IGDB dbt layer includes:
+
+- `stg_igdb__games`: source-shaped game reference rows.
+- `stg_igdb__involved_companies`: source-shaped game-company relationship rows.
+- `stg_igdb__companies`: source-shaped company rows.
+- `stg_igdb__genres`: source-shaped genre rows.
+- `stg_igdb__platforms`: source-shaped platform rows.
+- `stg_igdb__release_dates`: source-shaped release date rows.
+- `int_igdb__games_latest_by_title`: latest available IGDB game reference row per curated title slug.
+
+These models read staged Parquet under `data/stage/igdb/reference/` and write dbt views into the local DuckDB database. They do not create Steam-to-IGDB mappings or enrich the Steam-only mart.
+
+## Run dbt Steam-to-IGDB Crosswalk
+
+After Steam catalog dbt models and IGDB reference dbt models are available, build the deterministic crosswalk:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +int_crosswalk__steam_to_igdb_reference
+```
+
+The crosswalk layer includes:
+
+- `int_steam__app_catalog_latest_titles`: latest Steam catalog records with deterministic title keys.
+- `int_crosswalk__steam_to_igdb_reference`: one row per matched Steam app ID using conservative title-level matching.
+
+This command does not enrich `mart_steam__catalog_reputation_current`. It only creates an auditable intermediate mapping foundation for future enrichment work.
+
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, and a Steam-only catalog + reputation mart. It does not ingest IGDB or IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, IGDB reference stage normalization, IGDB dbt staging models, and a deterministic Steam-to-IGDB crosswalk foundation. It does not enrich the Steam mart with IGDB data or ingest IsThereAnyDeal data yet.

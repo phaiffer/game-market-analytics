@@ -96,3 +96,175 @@ models:
         description: "Latest review creation timestamp in the latest snapshot."
       - name: latest_review_updated_at
         description: "Latest review update timestamp in the latest snapshot."
+  - name: int_igdb__games_latest_by_title
+    description: "Latest available staged IGDB game reference row per curated title slug."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["igdb"]
+      - name: igdb_game_id
+        description: "IGDB game identifier selected for the curated title."
+        tests:
+          - not_null
+      - name: game_name
+        description: "Latest available IGDB game name."
+      - name: slug
+        description: "Latest available IGDB game slug."
+      - name: first_release_date
+        description: "IGDB first release timestamp when available."
+      - name: aggregated_rating
+        description: "Aggregated IGDB rating when available."
+      - name: aggregated_rating_count
+        description: "Count behind the aggregated IGDB rating when available."
+      - name: category
+        description: "IGDB game category value when available."
+      - name: input_title
+        description: "Curated title supplied to the raw ingestion flow."
+        tests:
+          - not_null
+      - name: title_slug
+        description: "Normalized title slug. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: selected_igdb_game_id
+        description: "IGDB game selected by the raw ingestion flow."
+      - name: extract_date
+        description: "Extract date for the selected latest record."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Run timestamp for the selected latest record."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Raw JSON payload path for the selected latest record."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Raw ingestion status for the selected latest record."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+      - name: staging_status
+        description: "Stage normalization status for the selected latest record."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+  - name: int_steam__app_catalog_latest_titles
+    description: "Latest Steam catalog records with deterministic title normalization fields for matching."
+    columns:
+      - name: source_system
+        description: "Source system identifier."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["steam"]
+      - name: source_app_id
+        description: "Steam application identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: steam_app_name
+        description: "Latest available Steam application name."
+        tests:
+          - not_null
+      - name: steam_title_normalized
+        description: "Deterministic normalized title key derived from the Steam app name."
+        tests:
+          - not_null
+      - name: steam_title_slug
+        description: "Slug-style deterministic title key derived from the Steam app name."
+        tests:
+          - not_null
+      - name: item_type
+        description: "Latest available Steam item type."
+      - name: extract_date
+        description: "Extract date for the selected latest Steam catalog record."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Run timestamp for the selected latest Steam catalog record."
+        tests:
+          - not_null
+      - name: raw_file_path
+        description: "Raw JSON payload path for the selected latest Steam catalog record."
+        tests:
+          - not_null
+      - name: ingestion_status
+        description: "Raw ingestion status for the selected latest Steam catalog record."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["success"]
+  - name: int_crosswalk__steam_to_igdb_reference
+    description: "Controlled deterministic crosswalk between latest Steam catalog titles and latest IGDB game reference titles."
+    columns:
+      - name: source_app_id
+        description: "Steam application identifier. This is the grain of the crosswalk."
+        tests:
+          - not_null
+          - unique
+      - name: steam_app_name
+        description: "Steam application name used for matching."
+        tests:
+          - not_null
+      - name: steam_title_normalized
+        description: "Deterministic normalized title key derived from the Steam app name."
+        tests:
+          - not_null
+      - name: steam_title_slug
+        description: "Slug-style deterministic title key derived from the Steam app name."
+      - name: steam_extract_date
+        description: "Extract date for the matched Steam catalog record."
+      - name: steam_run_timestamp
+        description: "Run timestamp for the matched Steam catalog record."
+      - name: steam_raw_file_path
+        description: "Raw Steam catalog payload path for the matched record."
+      - name: igdb_game_id
+        description: "Matched IGDB game identifier."
+        tests:
+          - not_null
+      - name: igdb_game_name
+        description: "IGDB game name used for matching."
+      - name: igdb_title_normalized
+        description: "Deterministic normalized title key derived from the IGDB game name."
+      - name: igdb_title_slug
+        description: "IGDB title slug from the curated IGDB reference helper model."
+        tests:
+          - not_null
+      - name: igdb_extract_date
+        description: "Extract date for the matched IGDB reference record."
+      - name: igdb_run_timestamp
+        description: "Run timestamp for the matched IGDB reference record."
+      - name: igdb_raw_file_path
+        description: "Raw IGDB payload path for the matched record."
+      - name: match_method
+        description: "Deterministic rule that produced the match."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["normalized_exact", "slug_exact"]
+      - name: is_exact_title_match
+        description: "True when the normalized Steam and IGDB title keys are equal."
+        tests:
+          - not_null
+      - name: is_manual_override
+        description: "Reserved flag for future manual override matches. Always false in this foundation step."
+        tests:
+          - not_null
+      - name: match_confidence
+        description: "Deterministic confidence score assigned by the match rule."
+        tests:
+          - not_null
