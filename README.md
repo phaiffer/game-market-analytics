@@ -4,7 +4,7 @@ Local-first data engineering and analytics engineering project for Steam game ma
 
 This repository implements a Steam-only MVP that ingests real Steam data, lands raw source payloads, normalizes them into staged Parquet datasets, models them with dbt and DuckDB, and publishes a first business-facing catalog + reputation mart.
 
-Phase 2 has started with controlled IGDB reference ingestion and stage normalization. These steps land raw IGDB payloads for curated game titles and normalize them into staged Parquet datasets; dbt models and Steam-to-IGDB mapping are intentionally deferred.
+Phase 2 has started with controlled IGDB reference ingestion, stage normalization, dbt modeling, deterministic Steam-to-IGDB matching, and a first enriched Steam mart.
 
 The project is intentionally portfolio-oriented: the implementation is small enough to inspect, but complete enough to show realistic ingestion, staging, modeling, testing, and analytical output.
 
@@ -34,6 +34,7 @@ Implemented now:
 - IGDB helper model for the latest game reference row per curated title.
 - Controlled Steam-to-IGDB title crosswalk foundation.
 - Final Steam-only mart: `mart_steam__catalog_reputation_current`.
+- First IGDB-enriched Steam mart: `mart_steam__catalog_reputation_enriched_current`.
 - Controlled IGDB raw reference ingestion for curated titles.
 - IGDB reference stage normalization to Parquet datasets.
 - Local DuckDB execution through a repository-local profile.
@@ -42,8 +43,8 @@ Implemented now:
 
 Deferred for later phases:
 
-- dbt models for IGDB genres, platforms, companies, publishers, and richer metadata.
 - Manual override mappings and broader Steam-to-IGDB entity resolution.
+- Broader IGDB coverage beyond curated validated titles.
 - IsThereAnyDeal pricing and discount history.
 - Historical trend marts and snapshots.
 - Full-catalog review crawling.
@@ -119,10 +120,15 @@ dbt intermediate:
 - `int_steam__review_summary_latest`
 - `int_igdb__games_latest_by_title`
 - `int_crosswalk__steam_to_igdb_reference`
+- `int_igdb__game_companies_current`
+- `int_igdb__game_genres_current`
+- `int_igdb__game_platforms_current`
+- `int_igdb__game_release_current`
 
 dbt mart:
 
 - `mart_steam__catalog_reputation_current`
+- `mart_steam__catalog_reputation_enriched_current`
 
 ## Final Analytical Output
 
@@ -294,12 +300,22 @@ dbt build --project-dir dbt --profiles-dir dbt --select +int_crosswalk__steam_to
 
 The crosswalk creates one row per matched Steam `source_app_id` using conservative deterministic matching against the curated IGDB latest-by-title helper. It currently supports exact normalized title matches and exact slug-style matches only. See `docs/dbt-steam-igdb-crosswalk.md` for details.
 
+## Enriched Steam Mart
+
+Build the first IGDB-enriched final mart and its dependencies:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_reputation_enriched_current
+```
+
+The enriched mart preserves one row per Steam `source_app_id`, keeps unmatched Steam rows, and adds IGDB match, company, genre, platform, and release metadata when available through the controlled crosswalk. See `docs/dbt-steam-igdb-enriched-mart.md` for details.
+
 ## Next Planned Phase
 
 The next logical phase is enrichment and broader analytical modeling:
 
-- Join the Steam-only mart to richer game metadata from IGDB.
-- Add genre, platform, company, and release dimensions.
+- Add manual override mapping support for broader Steam-to-IGDB coverage.
+- Expand IGDB enrichment beyond the currently validated curated titles.
 - Add pricing and discount history from IsThereAnyDeal.
 - Build historical review/reputation trend models.
 - Create lightweight portfolio presentation assets after the data model is stable.

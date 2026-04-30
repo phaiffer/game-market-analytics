@@ -268,3 +268,67 @@ models:
         description: "Deterministic confidence score assigned by the match rule."
         tests:
           - not_null
+  - name: int_igdb__game_companies_current
+    description: "Current IGDB company rollup per game, separating publisher and developer company names."
+    columns:
+      - name: igdb_game_id
+        description: "IGDB game identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: publisher_names
+        description: "Comma-separated publisher company names for the game when available."
+      - name: developer_names
+        description: "Comma-separated developer company names for the game when available."
+      - name: publisher_count
+        description: "Distinct publisher company count for the game."
+        tests:
+          - not_null
+      - name: developer_count
+        description: "Distinct developer company count for the game."
+        tests:
+          - not_null
+  - name: int_igdb__game_genres_current
+    description: "Current IGDB genre rollup per game."
+    columns:
+      - name: igdb_game_id
+        description: "IGDB game identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: genre_names
+        description: "Comma-separated genre names for the game when available."
+      - name: genre_count
+        description: "Distinct genre count for the game."
+        tests:
+          - not_null
+  - name: int_igdb__game_platforms_current
+    description: "Current IGDB platform rollup per game."
+    columns:
+      - name: igdb_game_id
+        description: "IGDB game identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: platform_names
+        description: "Comma-separated platform names for the game when available."
+      - name: platform_count
+        description: "Distinct platform count for the game."
+        tests:
+          - not_null
+  - name: int_igdb__game_release_current
+    description: "Current IGDB release metadata per game using latest game reference rows and staged release dates."
+    columns:
+      - name: igdb_game_id
+        description: "IGDB game identifier. This is the grain of the model."
+        tests:
+          - not_null
+          - unique
+      - name: first_release_date
+        description: "IGDB first release timestamp from the latest game reference row when available."
+      - name: earliest_release_date
+        description: "Earliest staged IGDB release date timestamp across release date rows when available."
+      - name: release_date_count
+        description: "Distinct staged release date count for the game."
+        tests:
+          - not_null

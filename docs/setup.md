@@ -420,6 +420,24 @@ The crosswalk layer includes:
 
 This command does not enrich `mart_steam__catalog_reputation_current`. It only creates an auditable intermediate mapping foundation for future enrichment work.
 
+## Run dbt Enriched Steam Mart
+
+After the Steam mart, IGDB dbt models, and crosswalk are available, build the first IGDB-enriched Steam mart:
+
+```powershell
+dbt build --project-dir dbt --profiles-dir dbt --select +mart_steam__catalog_reputation_enriched_current
+```
+
+The enriched layer includes:
+
+- `int_igdb__game_companies_current`: publisher and developer rollups per IGDB game.
+- `int_igdb__game_genres_current`: genre rollups per IGDB game.
+- `int_igdb__game_platforms_current`: platform rollups per IGDB game.
+- `int_igdb__game_release_current`: release metadata per IGDB game.
+- `mart_steam__catalog_reputation_enriched_current`: one row per Steam app, preserving unmatched Steam rows and adding IGDB metadata when a controlled crosswalk match exists.
+
+If the local DuckDB file is open in another application such as DataGrip, close that connection before running dbt against the default local profile.
+
 ## Current Scope
 
-The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, IGDB reference stage normalization, IGDB dbt staging models, and a deterministic Steam-to-IGDB crosswalk foundation. It does not enrich the Steam mart with IGDB data or ingest IsThereAnyDeal data yet.
+The local baseline supports setup, validation, path visibility, raw Steam app catalog landing, Steam app catalog stage normalization, dbt models over staged Steam data, controlled raw Steam reviews ingestion, Steam reviews stage normalization, a Steam-only catalog + reputation mart, controlled raw IGDB reference ingestion, IGDB reference stage normalization, IGDB dbt staging models, a deterministic Steam-to-IGDB crosswalk foundation, and a first IGDB-enriched Steam mart. It does not include manual override mapping, broad IGDB coverage, or IsThereAnyDeal data yet.

@@ -73,3 +73,91 @@ models:
           - accepted_values:
               arguments:
                 values: ["no_reviews", "1_9", "10_99", "100_999", "1000_plus"]
+  - name: mart_steam__catalog_reputation_enriched_current
+    description: "Current Steam catalog and reputation mart enriched with controlled IGDB reference metadata."
+    columns:
+      - name: source_app_id
+        description: "Steam application identifier. This is the grain of the mart."
+        tests:
+          - not_null
+          - unique
+      - name: source_system
+        description: "Source system identifier from the Steam catalog record."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["steam"]
+      - name: app_name
+        description: "Latest available Steam application name."
+        tests:
+          - not_null
+      - name: item_type
+        description: "Latest available Steam item type."
+      - name: extract_date
+        description: "Catalog extract date for the selected current catalog record."
+        tests:
+          - not_null
+      - name: run_timestamp
+        description: "Catalog run timestamp for the selected current catalog record."
+        tests:
+          - not_null
+      - name: has_reviews
+        description: "True when a latest review summary exists for the catalog app."
+        tests:
+          - not_null
+      - name: total_reviews
+        description: "Total reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: positive_reviews
+        description: "Positive reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: negative_reviews
+        description: "Negative reviews in the latest matched review snapshot, or zero when no review summary exists."
+        tests:
+          - not_null
+      - name: positive_review_ratio
+        description: "Positive review share among reviews with a known positive or negative vote."
+      - name: review_volume_bucket
+        description: "Simple review volume bucket for portfolio-friendly analysis."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["no_reviews", "1_9", "10_99", "100_999", "1000_plus"]
+      - name: has_igdb_match
+        description: "True when a controlled Steam-to-IGDB crosswalk match exists."
+        tests:
+          - not_null
+      - name: igdb_game_id
+        description: "Matched IGDB game identifier when available."
+      - name: igdb_game_name
+        description: "Matched IGDB game name when available."
+      - name: igdb_title_slug
+        description: "Matched IGDB title slug when available."
+      - name: match_method
+        description: "Deterministic crosswalk rule that produced the IGDB match when available."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["normalized_exact", "slug_exact"]
+              config:
+                where: "match_method is not null"
+      - name: match_confidence
+        description: "Deterministic confidence score assigned by the crosswalk rule when available."
+      - name: publisher_names
+        description: "Comma-separated IGDB publisher names when available."
+      - name: developer_names
+        description: "Comma-separated IGDB developer names when available."
+      - name: genre_names
+        description: "Comma-separated IGDB genre names when available."
+      - name: platform_names
+        description: "Comma-separated IGDB platform names when available."
+      - name: first_release_date
+        description: "IGDB first release timestamp when available."
+      - name: earliest_release_date
+        description: "Earliest staged IGDB release date timestamp when available."
+      - name: release_date_count
+        description: "Distinct staged IGDB release date count when a match exists."
